@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import linprog
+from itertools import product
 
 class IntervalMatrix:
     def __init__(self, mid: np.ndarray, rad: np.ndarray) -> None:
@@ -41,19 +42,21 @@ class IntervalMatrix:
         return(result.success)
 
 
+    def is_singular(self) -> bool:
+        n = self.mid.shape[0]
+        for combo in product([1, -1], repeat=n-1):
+            signs = [1] + list(combo)
+            if self.lp(signs): return True
+        return False
+
+
 if __name__ == "__main__":
     mid = np.array([[1, 1], [1, -1]])
 
     rad_1 = np.array([[1, 1], [1, 1]])
-    print(IntervalMatrix(mid, rad_1).lp([1, 1]))   
+    print(IntervalMatrix(mid, rad_1).is_singular())   # True
 
     rad_05 = np.array([[0.5, 0.5], [0.5, 0.5]])
-    print(IntervalMatrix(mid, rad_05).lp([1, 1]))
-
-    rad_1 = np.array([[1, 1], [1, 1]])
-    print(IntervalMatrix(mid, rad_1).lp([1, -1]))   
-
-    rad_05 = np.array([[0.5, 0.5], [0.5, 0.5]])
-    print(IntervalMatrix(mid, rad_05).lp([1, -1]))
+    print(IntervalMatrix(mid, rad_05).is_singular())   # False
 
        
