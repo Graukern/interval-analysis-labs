@@ -50,13 +50,31 @@ class IntervalMatrix:
         return False
 
 
+    def upper_bound_delta(self, mid: np.ndarray, R: np.ndarray) -> float:
+        x = np.ones(mid.shape[1])
+        high = np.max(np.abs(mid @ x) / (R @ x))
+        return high
+
+    
+    def find_critical_delta(self, mid: np.ndarray, R: np.ndarray) -> np.ndarray:
+        lower, high = 0.0, self.upper_bound_delta(mid, R) 
+        for _ in range(100):
+            mid_delta = lower + (high - lower) / 2
+            matrix = IntervalMatrix(mid, mid_delta * R)
+            if matrix.is_singular():
+                high = mid_delta
+            else:
+                lower = mid_delta
+        return high
+
+
 if __name__ == "__main__":
-    mid = np.array([[1, 1], [1, -1]])
-
-    rad_1 = np.array([[1, 1], [1, 1]])
-    print(IntervalMatrix(mid, rad_1).is_singular())   # True
-
-    rad_05 = np.array([[0.5, 0.5], [0.5, 0.5]])
-    print(IntervalMatrix(mid, rad_05).is_singular())   # False
+    mid = np.array([
+    [0.95, 1.00],
+    [1.05, 1.00],
+    [1.10, 1.00]
+    ])
+    rad = np.ones((3, 2))
+    print(IntervalMatrix(mid, rad).upper_bound_delta(mid, rad))
 
        
