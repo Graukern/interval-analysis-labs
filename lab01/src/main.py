@@ -51,22 +51,22 @@ class IntervalMatrix:
         return False
 
 
-    def upper_bound_delta(self, mid: np.ndarray, R: np.ndarray) -> float:
-        x = np.ones(mid.shape[1])
-        high = np.max(np.abs(mid @ x) / (R @ x))
-        return high
+def upper_bound_delta(mid: np.ndarray, R: np.ndarray) -> float:
+    x = np.ones(mid.shape[1])
+    high = np.max(np.abs(mid @ x) / (R @ x))
+    return high
 
-    
-    def find_critical_delta(self, mid: np.ndarray, R: np.ndarray) -> float:
-        lower, high = 0.0, self.upper_bound_delta(mid, R) 
-        for _ in range(100):
-            mid_delta = lower + (high - lower) / 2
-            matrix = IntervalMatrix(mid, mid_delta * R)
-            if matrix.is_singular():
-                high = mid_delta
-            else:
-                lower = mid_delta
-        return high
+
+def find_critical_delta(mid: np.ndarray, R: np.ndarray) -> float:
+    lower, high = 0.0, upper_bound_delta(mid, R) 
+    for _ in range(100):
+        mid_delta = lower + (high - lower) / 2
+        matrix = IntervalMatrix(mid, mid_delta * R)
+        if matrix.is_singular():
+            high = mid_delta
+        else:
+            lower = mid_delta
+    return high
 
 
 if __name__ == "__main__":
@@ -80,6 +80,6 @@ if __name__ == "__main__":
     R_3 = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
     R_4 = np.array([[1.0, 0.0], [1.0, 0.0], [1.0, 0.0]])
 
-    print(m.find_critical_delta(mid_A1, R_3))
-    print(m.find_critical_delta(mid_A1, R_4))
+    print(find_critical_delta(mid_A1, R_3))
+    print(find_critical_delta(mid_A1, R_4))
        
