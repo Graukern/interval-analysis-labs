@@ -55,6 +55,13 @@ class IntervalMatrix:
         return None
 
 
+    def build_singular_matrix(self, x: np.ndarray) -> np.ndarray:
+        T = -self.mid_times(x)
+        alpha = T / (self.rad_times_abs(x))
+        delta = np.outer(alpha, np.sign(x)) * self.rad
+
+        return self.mid + delta
+
 def upper_bound_delta(mid: np.ndarray, R: np.ndarray) -> float:
     x = np.ones(mid.shape[1])
     high = np.max(np.abs(mid @ x) / (R @ x))
@@ -74,6 +81,8 @@ def find_critical_delta(mid: np.ndarray, R: np.ndarray) -> tuple[float, np.ndarr
         else:
             lower = mid_delta
     return high, best_x
+
+
 
 
 if __name__ == "__main__":
