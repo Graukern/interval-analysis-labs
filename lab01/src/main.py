@@ -62,6 +62,18 @@ class IntervalMatrix:
 
         return self.mid + delta
 
+    def verify_singular_solution(self, x: np.ndarray) -> bool:
+        A_prime = self.build_singular_matrix(x)
+        full_rank = min(A_prime.shape)
+        is_deficient =  np.linalg.matrix_rank(A_prime) < full_rank
+
+        tol = 1e-6
+        above_lower = A_prime >= self.lower() - tol
+        below_upper = A_prime <= self.upper() + tol
+        in_box = np.all(above_lower & below_upper)
+
+        return bool(is_deficient and in_box)
+
 def upper_bound_delta(mid: np.ndarray, R: np.ndarray) -> float:
     x = np.ones(mid.shape[1])
     high = np.max(np.abs(mid @ x) / (R @ x))
@@ -87,11 +99,13 @@ def find_critical_delta(mid: np.ndarray, R: np.ndarray) -> tuple[float, np.ndarr
 
 if __name__ == "__main__":
     mid_A1 = np.array([[0.95, 1.00], [1.05, 1.00], [1.10, 1.00]])
-    R_3 = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-    R_4 = np.array([[1.0, 0.0], [1.0, 0.0], [1.0, 0.0]])
+    R_3 = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])   
+    R_4 = np.array([[1.0, 0.0], [1.0, 0.0], [1.0, 0.0]])   
 
     delta3, x3 = find_critical_delta(mid_A1, R_3)
-    print(delta3, x3)
+    matrix3 = IntervalMatrix(mid_A1, delta3 * R_3)
+    print(matrix3.verify_singular_solution(x3))   # ожидаем True
 
     delta4, x4 = find_critical_delta(mid_A1, R_4)
-    print(delta4, x4)
+    matrix4 = IntervalMatrix(mid_A1, delta4 * R_4)
+    print(matrix4.verify_singular_solution(x4))   # ожидаем True
