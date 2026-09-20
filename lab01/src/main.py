@@ -59,7 +59,16 @@ class IntervalMatrix:
 
     def build_singular_matrix(self, x: np.ndarray) -> np.ndarray:
         T = -self.mid_times(x)
-        alpha = T / (self.rad_times_abs(x))
+        denom = self.rad_times_abs(x)
+
+        # Безопасное деление: где знаменатель близок к 0, alpha = 0.0
+        alpha = np.divide(
+            T,
+            denom,
+            out=np.zeros_like(T, dtype=float),
+            where=np.abs(denom) > 1e-12,
+        )
+
         delta = np.outer(alpha, np.sign(x)) * self.rad
 
         return self.mid + delta
