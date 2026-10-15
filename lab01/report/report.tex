@@ -1,0 +1,301 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{amsmath}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{multirow}
+
+\usepackage[left=3cm, right=1.5cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing 
+
+\usepackage{indentfirst}
+\setlength{\parindent}{1.25cm} 
+\setlength{\emergencystretch}{3em}
+\usepackage[expansion=false,protrusion=false,nopatch=footnote]{microtype}
+
+\usepackage{tocloft}
+\addto\captionsrussian{\renewcommand{\contentsname}{СОДЕРЖАНИЕ}}
+\renewcommand{\cfttoctitlefont}{\hfill\normalfont}
+\renewcommand{\cftaftertoctitle}{\hfill\vspace{\baselineskip}}
+\renewcommand{\cftsecdotsep}{\cftdotsep}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        Министерство науки и высшего образования Российской Федерации\\
+        Федеральное государственное автономное образовательное учреждение высшего образования\\
+        «Санкт-Петербургский политехнический университет Петра Великого»\\
+        
+        \textbf{Физико-механический институт}\\
+        \textbf{Высшая школа прикладной математики и вычислительной физики}
+    \end{center}
+
+    \vfill
+    
+    \begin{center}
+        \textbf{Отчёт по лабораторной работе \textnumero~ 1\\[0.5cm]}
+        \textbf{Особенность интервальных матриц\\}
+        по дисциплине <<Интервальный анализ>>
+    \end{center}
+
+    \vfill
+
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        % TODO: проверить ФИО и номер группы
+        \textbf{Выполнил студент гр. 5030102/30202:}\\
+        Шильдт Д.С.\\[0.5cm]
+        \textbf{Преподаватель:}\\ 
+        Баженов А.Н.
+    \end{minipage}
+
+    \vfill
+
+    \begin{center}
+        Санкт-Петербург\\2026
+    \end{center}
+\end{titlepage}
+
+\setcounter{page}{2}
+
+\tableofcontents
+\newpage
+
+\section{Постановка задачи}
+
+Даны интервальные системы линейных алгебраических уравнений \[\mathbf{A}x = \mathbf{b}.\]
+
+\textbf{Задание 1.} Прямоугольная интервальная матрица $\mathbf{A}_1 \in \mathrm{IR}^{3\times 2}$ с матрицей центров
+\begin{equation*}
+    \operatorname{mid}\mathbf{A}_1 =
+    \begin{pmatrix}
+        0.95 & 1.00\\
+        1.05 & 1.00\\
+        1.10 & 1.00
+    \end{pmatrix}.
+\end{equation*}
+Матрица радиусов задаётся в одном из двух видов: $\operatorname{rad}\mathbf{A}_1 = \delta R_\text{т}$ (томография) или $\operatorname{rad}\mathbf{A}_1 = \delta R_\text{р}$ (регрессия), где
+\begin{equation*}
+    R_\text{т} =
+    \begin{pmatrix}
+        1.0 & 1.0\\
+        1.0 & 1.0\\
+        1.0 & 1.0
+    \end{pmatrix},\qquad
+    R_\text{р} =
+    \begin{pmatrix}
+        1.0 & 0.0\\
+        1.0 & 0.0\\
+        1.0 & 0.0
+    \end{pmatrix},
+    \qquad\delta \ge0.
+\end{equation*}
+    Для $\mathbf{A}_1$ требуется:
+\begin{enumerate}
+    \item Найти диапазон значений $\delta$, при которых интервальная матрица $\mathbf{A}_1$ содержит точечную матрицу неполного столбцового ранга (становится особенной).
+    \item Для найденного минимального значения $\delta$ построить точечную матрицу $A_1' \in \mathbf{A}_1$ для которой  \[\operatorname{det} A_1' = 0\]
+    \item Проверить принадлежность $A_1' \in \mathbf{A}_1$ и особенность $A_1'$.
+\end{enumerate}
+
+\textbf{Задание 2.} Квадратная интервальная матрица $\mathbf{A}_2 \in \mathrm{IR}^{3\times 3}$ с матрицами центров и радиусов
+\begin{equation*}
+    \operatorname{mid}\mathbf{A}_2 =
+    \begin{pmatrix}
+        1.10 & 0.90 & 1.10\\
+        1.40 & 1.00 & 0.80\\
+        0.80 & 1.40 & 1.20
+    \end{pmatrix},\qquad
+    \operatorname{rad}\mathbf{A}_2 = \delta
+    \begin{pmatrix}
+        1.0 & 1.0 & 1.0\\
+        1.0 & 1.0 & 1.0\\
+        1.0 & 1.0 & 1.0
+    \end{pmatrix},
+    \qquad\delta \ge0.
+\end{equation*}
+Требуется найти диапазон $\delta$, при которых $\mathbf{A}_2$ особенна, для минимального $\delta$ построить $A_2' \in \mathbf{A}_2$ с $\det A_2' = 0$ и проверить принадлежность и особенность $A_2'$.
+
+\textbf{Задание 3.} Обсудить полученные результаты для прямоугольной и квадратной интервальных матриц
+для случаев линейной регрессии и малоракурсной томографии.
+
+\textbf{Цели и задачи:}
+\begin{itemize}
+    \item Найти минимальные значения $\delta^*$, при которых $\mathbf{A}_1$ (оба вида радиусов) и $\mathbf{A}_2$ становятся особенными.
+    \item Построить особенные точечные матрицы для $\delta = \delta^*$ и проверить их свойства.
+    \item Сравнить результаты для постановок регрессии и томографии.
+\end{itemize}
+
+\section{Теоретическая часть}
+
+\subsection{Интервальные матрицы}
+
+Интервал $\mathbf{a} = [\underline{a}, \overline{a}]$ характеризуется центром $\operatorname{mid}\mathbf{a} = (\underline{a} + \overline{a})/2$ и радиусом $\operatorname{rad}\mathbf{a} = (\overline{a} - \underline{a})/2$~\cite[с.~17, 25]{bazhenov}. Интервальная матрица $\mathbf{A} \in \mathrm{IR}^{m\times n}$ --- прямоугольная таблица интервалов~\cite[с.~31--32]{bazhenov}, задаваемая матрицами $\operatorname{mid}\mathbf{A}$ и $\operatorname{rad}\mathbf{A} \ge 0$. Точечная матрица $A$ принадлежит $\mathbf{A}$, если
+\begin{equation}
+    |A - \operatorname{mid}\mathbf{A}| \le \operatorname{rad}\mathbf{A},
+    \label{eq:member}
+\end{equation}
+то есть $\operatorname{mid}\mathbf{A} - \operatorname{rad}\mathbf{A} \le A \le \operatorname{mid}\mathbf{A} + \operatorname{rad}\mathbf{A}$.
+
+\subsection{Особенность интервальной матрицы}
+
+Интервальная матрица $\mathbf{A} \in \mathrm{IR}^{n\times n}$ называется особенной, если она содержит хотя бы одну особенную точечную матрицу, и неособенной в противном случае~\cite[с.~50]{bazhenov}. Для прямоугольной $\mathbf{A} \in \mathrm{IR}^{m\times n}$, $m \ge n$, особенность означает наличие $A \in \mathbf{A}$ с $\operatorname{rank} A < n$.
+
+Используется критерий~\cite[с.~52, теорема~1.2.5]{bazhenov}: $\mathbf{A}$ особенна тогда и только тогда, когда система
+\begin{equation}
+    |(\operatorname{mid}\mathbf{A})\,x| \le (\operatorname{rad}\mathbf{A})\,|x|
+    \label{eq:crit}
+\end{equation}
+имеет решение $x \ne 0$. В~\cite{bazhenov} критерий сформулирован для квадратных матриц; приведённое ниже обоснование квадратность не использует, поэтому критерий применим и к $\mathbf{A}_1$.
+
+Если $A'x = 0$ для $A' \in \mathbf{A}$, $x \ne 0$, то по~\eqref{eq:member} $|(\operatorname{mid}\mathbf{A})x| = |(\operatorname{mid}\mathbf{A} - A')x| \le (\operatorname{rad}\mathbf{A})|x|$. Обратно, пусть $x \ne 0$ удовлетворяет~\eqref{eq:crit}. Положим
+\begin{equation}
+    \begin{gathered}
+        A' = \operatorname{mid}\mathbf{A} + \Delta A, \qquad
+        \Delta A_{ij} = \alpha_i \operatorname{sign}(x_j)\,(\operatorname{rad}\mathbf{A})_{ij},\\
+        \alpha_i = -\frac{((\operatorname{mid}\mathbf{A})\,x)_i}{((\operatorname{rad}\mathbf{A})\,|x|)_i}
+    \end{gathered}
+    \label{eq:construct}
+\end{equation}
+(если $((\operatorname{rad}\mathbf{A})|x|)_i = 0$, то из~\eqref{eq:crit} следует $((\operatorname{mid}\mathbf{A})x)_i = 0$, и полагается $\alpha_i = 0$). Из~\eqref{eq:crit} $|\alpha_i| \le 1$, поэтому $A' \in \mathbf{A}$. Так как $\operatorname{sign}(x_j)\,x_j = |x_j|$, имеем $(\Delta A\,x)_i = \alpha_i((\operatorname{rad}\mathbf{A})|x|)_i = -((\operatorname{mid}\mathbf{A})x)_i$, то есть $A'x = 0$ и $\operatorname{rank} A' < n$ (для квадратной матрицы $\det A' = 0$).
+
+\subsection{Критическое значение параметра}
+
+Пусть $\operatorname{rad}\mathbf{A} = \delta R$, $R \ge 0$; обозначим такую матрицу $\mathbf{A}(\delta)$. При $\delta_1 \le \delta_2$ выполняется $\mathbf{A}(\delta_1) \subseteq \mathbf{A}(\delta_2)$, поэтому $\mathbf{A}(\delta)$ особенна при $\delta \in [\delta^*, +\infty)$, где согласно~\eqref{eq:crit}
+\begin{equation}
+    \delta^* = \min\bigl\{\delta \ge 0 \;\big|\; \exists\, x \ne 0 :\ |(\operatorname{mid}\mathbf{A})\,x| \le \delta R\,|x|\bigr\}.
+    \label{eq:deltastar}
+\end{equation}
+Подстановка в~\eqref{eq:crit} вектора $e = (1, \dots, 1)^T$ даёт верхнюю оценку (при $(Re)_i > 0$):
+\begin{equation}
+    \delta^* \le \overline{\delta} = \max_i \frac{|((\operatorname{mid}\mathbf{A})\,e)_i|}{(R\,e)_i}.
+    \label{eq:upper}
+\end{equation}
+
+\subsection{Сведение к линейному программированию}
+
+Условие~\eqref{eq:crit} не меняется при замене $x \to -x$, поэтому знак первой компоненты можно зафиксировать. Для вектора знаков $s \in \{-1, 1\}^n$, $s_1 = 1$ ($2^{n-1}$ ортантов), положим $D_s = \operatorname{diag}(s)$, $x = D_s y$, $y \ge 0$. Тогда $|x| = y$, и в силу однородности~\eqref{eq:crit} можно нормировать $\sum_j y_j = 1$, что исключает $x = 0$. В ортанте $s$ условие~\eqref{eq:crit} становится линейным:
+\begin{equation}
+    \begin{gathered}
+        (\operatorname{mid}\mathbf{A}\,D_s - \operatorname{rad}\mathbf{A})\,y \le 0, \qquad
+        (-\operatorname{mid}\mathbf{A}\,D_s - \operatorname{rad}\mathbf{A})\,y \le 0,\\
+        \sum_{j=1}^n y_j = 1, \qquad y \ge 0.
+    \end{gathered}
+    \label{eq:lp}
+\end{equation}
+$\mathbf{A}$ особенна тогда и только тогда, когда~\eqref{eq:lp} совместна хотя бы для одного $s$. Проверка совместности --- задача линейного программирования с нулевой целевой функцией.
+
+\section{Реализация}
+
+\subsection{Язык программирования и среда}
+\begin{itemize}
+    % TODO: проверить версию (python --version)
+    \item \textbf{Используемый язык:} Python 3.14.2
+    \item \textbf{Используемая среда разработки:} Visual Studio Code
+\end{itemize}
+
+\subsection{Используемые библиотеки}
+\begin{itemize}
+    \item \textbf{numpy} --- матричные операции, вычисление ранга, определителя и нормы невязки (модуль \texttt{linalg}).
+    \item \textbf{scipy.optimize} --- функция \texttt{linprog} для проверки совместности
+    \item \textbf{itertools} --- функция \texttt{product} для перебора векторов знаков $s$.
+\end{itemize}
+
+\subsection{Суть реализованных методов}
+
+Класс \texttt{IntervalMatrix(mid, rad)}:
+\begin{itemize}
+    \item \texttt{lower()}, \texttt{upper()} --- матрицы концов $\operatorname{mid}\mathbf{A} \mp \operatorname{rad}\mathbf{A}$ для проверки~\eqref{eq:member}.
+    \item \texttt{mid\_times(x)}, \texttt{rad\_times\_abs(x)} --- левая и правая части~\eqref{eq:crit}.
+    \item \texttt{lp(signs)} --- решает~\eqref{eq:lp} для ортанта $s$ и при совместности возвращает $x = s \circ y$, иначе \texttt{None}.
+    \item \texttt{is\_singular()} --- перебирает $2^{n-1}$ векторов знаков и возвращает первый найденный $x$ либо \texttt{None}.
+    \item \texttt{build\_singular\_matrix(x)} --- строит $A'$ по~\eqref{eq:construct}; при знаменателе меньше $10^{-12}$ полагается $\alpha_i = 0$.
+    \item \texttt{verify\_singular\_solution(x)} --- проверяет $\operatorname{rank} A' < \min(m, n)$ и~\eqref{eq:member} с допуском $10^{-6}$ на погрешность решателя ЛП.
+\end{itemize}
+
+Функции модуля:
+\begin{itemize}
+    \item \texttt{upper\_bound\_delta(mid, R)} --- оценка $\overline{\delta}$ по~\eqref{eq:upper}.
+    \item \texttt{find\_critical\_delta(mid, R)} --- бисекция на $[0, \overline{\delta}]$ (100 итераций) для поиска $\delta^*$ из~\eqref{eq:deltastar}: если \texttt{is\_singular()} находит $x$ для середины отрезка, сдвигается правая граница и сохраняется $x$, иначе --- левая. Возвращает $(\delta^*, x)$.
+    \item \texttt{print\_case\_report(title, mid, R)} --- выполняет пункты 1--3 задания для одного случая и выводит результаты.
+\end{itemize}
+
+\section{Результаты}
+
+Найденные значения $\delta^*$ приведены в таблице~\ref{tab:delta}. Во всех случаях матрица особенна при $\delta \in [\delta^*, +\infty)$.
+
+\begin{table}[H]
+    \centering
+    \caption{Минимальные значения $\delta^*$ и проверка построенных матриц $A'$}
+    \label{tab:delta}
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Матрица} & \textbf{Радиусы} & $\boldsymbol{\delta^*}$ & $A' \in \mathbf{A}$ & $\operatorname{rank} A'$ \\ \hline
+        $\mathbf{A}_1$, томография & $\delta R_\text{т}$ & $0.03703699$ & да & 1 \\ \hline
+        $\mathbf{A}_1$, регрессия  & $\delta R_\text{р}$ & $0.07499990$ & да & 1 \\ \hline
+        $\mathbf{A}_2$             & $\delta R$         & $0.09999994$ & да & 2 \\ \hline
+    \end{tabular}
+\end{table}
+
+Построенные по~\eqref{eq:construct} точечные матрицы:
+\begin{gather*}
+    A_{1,\text{т}}' =
+    \begin{pmatrix}
+        0.987037 & 0.962963\\
+        1.037654 & 1.012346\\
+        1.062963 & 1.037037
+    \end{pmatrix},\qquad
+    A_{1,\text{р}}' =
+    \begin{pmatrix}
+        1.025 & 1\\
+        1.025 & 1\\
+        1.025 & 1
+    \end{pmatrix},\\
+    A_2' =
+    \begin{pmatrix}
+        1.1 & 1.0 & 1.0\\
+        1.4 & 0.9 & 0.9\\
+        0.8 & 1.3 & 1.3
+    \end{pmatrix}.
+\end{gather*}
+
+\section{Обсуждение}
+
+Для $\mathbf{A}_1$ в случае регрессии получено $\delta^* \approx 0.075$. Первый столбец $\mathbf{A}_1$ содержит значения фактора $0.95$, $1.05$, $1.10$, а второй столбец (единицы) известен точно. Матрица теряет ранг, когда все значения фактора можно сделать одинаковыми, т.~е. при $\delta = (1.10 - 0.95)/2 = 0.075$. В матрице $A_{1,\text{р}}'$ все значения фактора равны $1.025$, и наклон прямой по таким данным найти нельзя.
+
+В случае томографии погрешность есть во всех элементах, поэтому матрица становится особенной раньше, при $\delta^* = 1/27 \approx 0.037$, т.~е. примерно в 2 раза меньше, чем для регрессии. Значение $1/27$ получается подстановкой найденного вектора $x \approx (40/81,\ -41/81)^T$ в~\eqref{eq:crit}. В обоих случаях $\delta^*$ маленькое, так как столбцы $\operatorname{mid}\mathbf{A}_1$ почти пропорциональны.
+
+Для квадратной матрицы $\mathbf{A}_2$ получено $\delta^* \approx 0.1$, это больше, чем для $\mathbf{A}_1$. В $A_2'$ совпадают второй и третий столбцы. В $\operatorname{mid}\mathbf{A}_2$ они отличаются на $0.2$ в каждой строке, поэтому для совпадения каждый элемент нужно сдвинуть на $0.1$.
+
+Значения, полученные программой, отличаются от $0.075$, $0.037$ и $0.1$ на величину порядка $10^{-7}$ из-за погрешности решателя ЛП. При $\delta \ge \delta^*$ решение системы $\mathbf{A}x = \mathbf{b}$ может быть неединственным.
+
+\section{Выводы}
+
+В работе для интервальных матриц $\mathbf{A}_1$ и $\mathbf{A}_2$ найдены минимальные значения $\delta^*$, при которых они становятся особенными. Особенность проверялась по теореме~1.2.5 из~\cite{bazhenov} через перебор задач ЛП, $\delta^*$ искалось бисекцией.
+
+Для $\mathbf{A}_1$ получено $\delta^* \approx 0.037$ в случае томографии и $\delta^* \approx 0.075$ в случае регрессии, для $\mathbf{A}_2$ --- $\delta^* \approx 0.1$. Для каждого случая построена матрица $A'$ и проверено, что она принадлежит интервальной матрице и имеет неполный ранг.
+ 
+\refstepcounter{section}
+\addcontentsline{toc}{section}{\thesection\ Список литературы}
+\renewcommand{\refname}{\thesection\ Список литературы}
+
+\begin{thebibliography}{9}
+
+    \bibitem{bazhenov}
+    Баженов А. Н. Интервальный анализ в примерах : учеб. пособие / А. Н. Баженов, А. А. Карпова. --- СПб. : Санкт-Петербургский политехнический университет Петра Великого, 2024. --- 226 с.
+
+\end{thebibliography}
+
+\section{Приложение}
+
+GitHub репозиторий (файл \texttt{lab01/src/main.py}): \\
+\url{https://github.com/Graukern/interval-analysis-labs}
+ 
+\end{document}
