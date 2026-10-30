@@ -29,17 +29,28 @@ class Interval:
         new_hi = self.hi - other.lo
         return Interval(new_lo, new_hi)
 
-    
+
+    def __mul__(self, other: "Interval") -> "Interval":
+        comb = []
+
+        for i in [self.lo, self.hi]:
+            for j in [other.lo, other.hi]:
+                comb.append(i * j)
+
+        new_lo = min(comb)
+        new_hi = max(comb)
+        return Interval(new_lo, new_hi)
+
+
     def __repr__(self) -> str:
         return f"[{self.lo}, {self.hi}]"
 
     
 def main():
-    a = Interval(1, 2)
-    b = Interval(3, 5)
+    a = Interval(-2, 3)
+    b = Interval(-1, 4)
 
-    print(a + b)
-    print(a - b)
+    print(a * b)
 
 
 if __name__ == "__main__":
