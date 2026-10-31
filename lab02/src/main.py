@@ -93,20 +93,20 @@ def icos(x: Interval) -> Interval:
         
     return Interval(new_lo, new_hi)
 
+
+def dist(a: Interval, b: Interval) -> float:
+    return max(abs(a.lo - b.lo), abs(a.hi - b.hi))
+
     
 def main():
-    a = Interval(0, 1)
-    b = Interval(1, 2)
-    c = Interval(2, 4)
-    d = Interval(0, 4)
-    e = Interval(5, 7)
+    a = Interval(2, 3)
+    b = Interval(1, 5)
+    c = Interval(-1, 8)
 
-    print(icos(a))
-    print(icos(b))
-    print(icos(c))
-    print(icos(d))
-    print(icos(e))
+    print(dist(a, b))
+    print(dist(b, c))
+    print(dist(a, c))
 
-
+    
 if __name__ == "__main__":
     main()
