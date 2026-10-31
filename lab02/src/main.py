@@ -1,3 +1,5 @@
+import math
+
 class Interval:
     def __init__(self, lo: float, hi: float):
         if lo > hi: 
@@ -70,15 +72,41 @@ class Interval:
     def __repr__(self) -> str:
         return f"[{self.lo}, {self.hi}]"
 
+
+def icos(x: Interval) -> Interval:
+    has_valley = False
+    has_peak = False
+
+    k_lo = math.floor(x.lo / (2 * math.pi))
+    k_hi = math.ceil(x.hi / (2 * math.pi))
+
+    for k in range(k_lo, k_hi + 1):
+        if x.lo <= math.pi + 2 * math.pi * k <= x.hi:
+            has_valley = True
+        if x.lo <= 2 * math.pi * k <= x.hi:
+            has_peak = True
+        if has_valley and has_peak:
+            break
+
+    new_lo = -1 if has_valley else min(math.cos(x.lo), math.cos(x.hi))
+    new_hi = 1 if has_peak else max(math.cos(x.lo), math.cos(x.hi))
+        
+    return Interval(new_lo, new_hi)
+
     
 def main():
-    a = Interval(1, 2)
+    a = Interval(0, 1)
+    b = Interval(1, 2)
+    c = Interval(2, 4)
+    d = Interval(0, 4)
+    e = Interval(5, 7)
 
-    print(a + 3)
-    print(3 - a)
-    print(a - 3)
-    print(2 * a)
-    print(a * (-2))
+    print(icos(a))
+    print(icos(b))
+    print(icos(c))
+    print(icos(d))
+    print(icos(e))
+
 
 if __name__ == "__main__":
     main()
