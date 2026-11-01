@@ -34,6 +34,18 @@ def F_sl(f, s, X: "Interval", c: float) -> "Interval":
     return f(c) + s(X, c) * (X - c)
 
 
+def F_bic(f, df, X: "Interval") -> "Interval":
+    df_interval = df(X)
+    df_mid = df_interval.mid()
+    df_rad = df_interval.rad()
+    p = cut(df_mid / df_rad, Interval(-1, 1))
+
+    c_lo = X.mid() - p * X.rad()
+    c_hi = X.mid() + p * X.rad()
+
+    return intersect(F_mv(f, df, X, c_lo), F_mv(f, df, X, c_hi))
+
+
 class Interval:
     def __init__(self, lo: float, hi: float):
         if lo > hi: 
