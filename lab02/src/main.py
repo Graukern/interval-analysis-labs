@@ -10,6 +10,10 @@ def f1(x: float) -> float:
     return x ** 3 - 3 * x ** 2 + 2
 
 
+def f2(x: float) -> float:
+    return x ** 3 * np.cos(x) 
+
+
 class Interval:
     def __init__(self, lo: float, hi: float):
         if lo > hi: 
