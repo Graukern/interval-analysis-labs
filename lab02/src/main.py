@@ -26,6 +26,14 @@ def f2(x: float) -> float:
     return x ** 3 * np.cos(x) 
 
 
+def F_mv(f, df, X: "Interval", c: float) -> "Interval":
+    return f(c) + df(X) * (X - c)
+
+
+def F_sl(f, s, X: "Interval", c: float) -> "Interval":
+    return f(c) + s(X, c) * (X - c)
+
+
 class Interval:
     def __init__(self, lo: float, hi: float):
         if lo > hi: 
@@ -186,18 +194,13 @@ def visualization(f, X:Interval, func_name: str) -> None:
 
 
 def main():
-    a = Interval(-5, 1)
-    b = Interval(-1, 2)
-    c = Interval(0, 3)
+    X = Interval(0, 3)
 
-    print(a ** 3)
-    print(b ** 2)
-    print(c ** 3)
+    for c in [0, 1.5, 3]:
+        mv = F_mv(f1, df1, X, c)
+        sl = F_sl(f1, s1, X, c)
 
-    print(a ** 0)
-    print(b ** 1)
+        print(f"F_mv = {mv} | F_sl = {sl} | c = {c}")
     
-
-
 if __name__ == "__main__":
     main()
