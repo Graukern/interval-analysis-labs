@@ -172,6 +172,20 @@ def exact_range(f, X:Interval) -> Interval:
     return Interval(min(ys.min(), new_lo), max(ys.max(), new_hi))
 
 
+def cut(x: float, bound: "Interval") -> float:
+    if x < bound.lo: return bound.lo
+    elif x > bound.hi: return bound.hi
+    
+    return x
+
+
+def intersect(a: "Interval", b: "Interval") -> "Interval":
+    new_lo = max(a.lo, b.lo)
+    new_hi = min(a.hi, b.hi)
+
+    return Interval(new_lo, new_hi)
+
+
 def visualization(f, X:Interval, func_name: str) -> None:
     N = 300
     x_f = np.linspace(X.lo, X.hi, N)
