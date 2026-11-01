@@ -1,6 +1,10 @@
 import math
+from pathlib import Path
+
 import numpy as np
+from matplotlib import pyplot as plt
 from scipy.optimize import minimize_scalar
+
 
 def f1(x: float) -> float:
     return x ** 3 - 3 * x ** 2 + 2
@@ -118,8 +122,40 @@ def exact_range(f, X:Interval) -> Interval:
     return Interval(min(ys.min(), new_lo), max(ys.max(), new_hi))
 
 
+def visualization(f, X:Interval, func_name: str) -> None:
+    N = 300
+    x_f = np.linspace(X.lo, X.hi, N)
+    y_f = f(x_f)
+
+    bounds = exact_range(f, X)
+    y_min = bounds.lo
+    y_max = bounds.hi
+
+    plt.figure(figsize=(10, 6))
+
+    plt.plot(x_f, y_f, label='$f(x)$', color='blue')
+    plt.axhline(y_min, ls='--', linewidth=2, color='red', label=f'Min:{y_min:.2f}')
+    plt.axhline(y_max, ls='--', linewidth=2, color='green', label=f'Max:{y_max:.2f}')
+
+    plt.fill_between(x_f, y_min, y_max, color='gray', alpha=0.2)
+
+    
+    plt.xlabel('$x$')
+    plt.ylabel('$f(x)$')
+    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+    plt.grid()
+    plt.tight_layout()
+
+    script_dir = Path(__file__).resolve().parent
+    save_path = script_dir.parent / "report" / "figures" / f"{func_name}.png"
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
+    plt.show()
+
+
 def main():
-    print(exact_range(f1, Interval(0, 3)))
+    visualization(f1, Interval(0, 3), "f1")
 
 
 if __name__ == "__main__":
