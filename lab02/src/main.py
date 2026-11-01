@@ -6,46 +6,6 @@ from matplotlib import pyplot as plt
 from scipy.optimize import minimize_scalar
 
 
-def f1(x: float) -> float:
-    return x ** 3 - 3 * x ** 2 + 2
-
-
-def f1_horner(x: float) -> float:
-    return ((x - 3) * x + 0) * x + 2
-
-
-def df1(x: float):
-    return 3 * x ** 2 - 6 * x
-
-
-def s1(X: "Interval", c: float) -> "Interval":
-    return X ** 2 + X * c + c ** 2 - 3 * X - 3 * c
-
-
-def f2(x: float) -> float:
-    return x ** 3 * np.cos(x) 
-
-
-def F_mv(f, df, X: "Interval", c: float) -> "Interval":
-    return f(c) + df(X) * (X - c)
-
-
-def F_sl(f, s, X: "Interval", c: float) -> "Interval":
-    return f(c) + s(X, c) * (X - c)
-
-
-def F_bic(f, df, X: "Interval") -> "Interval":
-    df_interval = df(X)
-    df_mid = df_interval.mid()
-    df_rad = df_interval.rad()
-    p = cut(df_mid / df_rad, Interval(-1, 1))
-
-    c_lo = X.mid() - p * X.rad()
-    c_hi = X.mid() + p * X.rad()
-
-    return intersect(F_mv(f, df, X, c_lo), F_mv(f, df, X, c_hi))
-
-
 class Interval:
     def __init__(self, lo: float, hi: float):
         if lo > hi: 
@@ -131,6 +91,46 @@ class Interval:
         
     def __repr__(self) -> str:
         return f"[{self.lo}, {self.hi}]"
+
+
+def f1(x: float) -> float:
+    return x ** 3 - 3 * x ** 2 + 2
+
+
+def f1_horner(x: float) -> float:
+    return ((x - 3) * x + 0) * x + 2
+
+
+def df1(x: float):
+    return 3 * x ** 2 - 6 * x
+
+
+def s1(X: "Interval", c: float) -> "Interval":
+    return X ** 2 + X * c + c ** 2 - 3 * X - 3 * c
+
+
+def f2(x: float) -> float:
+    return x ** 3 * np.cos(x) 
+
+
+def F_mv(f, df, X: "Interval", c: float) -> "Interval":
+    return f(c) + df(X) * (X - c)
+
+
+def F_sl(f, s, X: "Interval", c: float) -> "Interval":
+    return f(c) + s(X, c) * (X - c)
+
+
+def F_bic(f, df, X: "Interval") -> "Interval":
+    df_interval = df(X)
+    df_mid = df_interval.mid()
+    df_rad = df_interval.rad()
+    p = cut(df_mid / df_rad, Interval(-1, 1))
+
+    c_lo = X.mid() - p * X.rad()
+    c_hi = X.mid() + p * X.rad()
+
+    return intersect(F_mv(f, df, X, c_lo), F_mv(f, df, X, c_hi))
 
 
 def icos(x: Interval) -> Interval:
