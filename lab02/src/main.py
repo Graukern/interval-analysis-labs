@@ -10,6 +10,18 @@ def f1(x: float) -> float:
     return x ** 3 - 3 * x ** 2 + 2
 
 
+def f1_horner(x: float) -> float:
+    return ((x - 3) * x + 0) * x + 2
+
+
+def df1(x: float):
+    return 3 * x ** 2 - 6 * x
+
+
+def s1(X: "Interval", c: float) -> "Interval":
+    return X ** 2 + X * c + c ** 2 - 3 * X - 3 * c
+
+
 def f2(x: float) -> float:
     return x ** 3 * np.cos(x) 
 
