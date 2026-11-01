@@ -1,4 +1,10 @@
 import math
+import numpy as np
+from scipy.optimize import minimize_scalar
+
+def f1(x: float) -> float:
+    return x ** 3 - 3 * x ** 2 + 2
+
 
 class Interval:
     def __init__(self, lo: float, hi: float):
@@ -97,16 +103,24 @@ def icos(x: Interval) -> Interval:
 def dist(a: Interval, b: Interval) -> float:
     return max(abs(a.lo - b.lo), abs(a.hi - b.hi))
 
-    
+
+def exact_range(f, X:Interval) -> Interval:
+    N = 10001
+    xs = np.linspace(X.lo, X.hi, N)
+    ys = f(xs)
+
+    i_min = np.argmin(ys)
+    i_max = np.argmax(ys)
+
+    new_lo = minimize_scalar(f, bounds=(xs[max(i_min - 1, 0)], xs[min(i_min + 1, N - 1)]), method="bounded").fun
+    new_hi = -minimize_scalar(lambda x: -f(x), bounds=(xs[max(i_max - 1, 0)], xs[min(i_max + 1, N - 1)]), method="bounded").fun
+
+    return Interval(min(ys.min(), new_lo), max(ys.max(), new_hi))
+
+
 def main():
-    a = Interval(2, 3)
-    b = Interval(1, 5)
-    c = Interval(-1, 8)
+    print(exact_range(f1, Interval(0, 3)))
 
-    print(dist(a, b))
-    print(dist(b, c))
-    print(dist(a, c))
 
-    
 if __name__ == "__main__":
     main()
