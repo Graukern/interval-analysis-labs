@@ -81,8 +81,22 @@ class Interval:
 
     def __rmul__(self, other):
         return self * other
-    
 
+    
+    def __pow__(self, n: int) -> "Interval":
+        if not isinstance(n, int):
+            raise TypeError(f"Степень не целое число n={n}.")
+        elif n < 0:
+            raise ValueError(f"Степень отрицательная n={n}.")
+        elif n == 0:
+            return Interval(1, 1)
+
+        new_interval = self
+        for _ in range(1, n):
+            new_interval *= self
+
+        return new_interval
+        
     def __repr__(self) -> str:
         return f"[{self.lo}, {self.hi}]"
 
@@ -155,11 +169,22 @@ def visualization(f, X:Interval, func_name: str) -> None:
     save_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-    plt.show()
+    # plt.show()
+    plt.close()
 
 
 def main():
-    visualization(f1, Interval(0, 3), "f1")
+    a = Interval(-5, 1)
+    b = Interval(-1, 2)
+    c = Interval(0, 3)
+
+    print(a ** 3)
+    print(b ** 2)
+    print(c ** 3)
+
+    print(a ** 0)
+    print(b ** 1)
+    
 
 
 if __name__ == "__main__":
