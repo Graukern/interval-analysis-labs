@@ -262,10 +262,17 @@ def lip_bound(F: Interval, L, X: Interval) -> bool:
     return F.rad() <= X.rad() * L
 
 
+def contains(F: Interval, E: Interval) -> bool:
+    eps = 1e-9
+    return F.lo <= E.lo + eps and F.hi >= E.hi - eps
+
+
 def print_row(name: str, F: Interval, E: Interval, X: Interval, L: float | None = None) -> None:
     lip_val = f"{lip_bound(F, L, X)}" if L is not None else "-"
-    print(f"{name:<25} | F: [{F.lo:.3f}, {F.hi:.3f}] | rad: {F.rad():.3f} | dist: {dist(F, E):.3f} | lip: {lip_val}")
-
+    incl_val = f"{contains(F, E)}"
+    print(
+        f"{name:<25} | F: [{F.lo:8.3f}, {F.hi:8.3f}] | rad: {F.rad():7.3f} | dist: {dist(F, E):7.3f} | incl: {incl_val:<5} | lip: {lip_val}"
+    )
 
 def visualization(f, X:Interval, func_name: str) -> None:
     N = 300
