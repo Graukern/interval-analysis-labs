@@ -201,6 +201,17 @@ def F_mv_2d(f, dfx, dfy, X: Interval, Y: Interval, c: tuple[float, float]) -> In
     return f(cx, cy) + dfx(X, Y) * (X - cx) + dfy(X, Y) * (Y - cy)
 
 
+def print_summary(rows: list[tuple[str, Interval]], E: Interval) -> None:
+    sorted_rows = sorted(rows, key=lambda item: dist(item[1], E))
+    print()
+    print("=" * 66)
+    print(f"{'#':<3} | {'Метод':<32} | {'dist':<10} | {'rad':<10}")
+    print("-" * 66)
+    for rank, (name, F) in enumerate(sorted_rows, start=1):
+        print(f"{rank:<3} | {name:<32} | {dist(F, E):<10.3f} | {F.rad():<10.3f}")
+    print("=" * 66)
+
+
 def run_f3() -> None:
     X3 = Interval(-1, 2)
     Y3 = Interval(-1, 2)
@@ -208,21 +219,33 @@ def run_f3() -> None:
     E3 = exact_range_2d(f3, X3, Y3)
     print(f"E3 (точная область значений) = [{E3.lo:.3f}, {E3.hi:.3f}]")
 
-    print_row("E.3 естественное", f3(X3, Y3), E3, X3)
-    print_row("E.4 равносильная", f3_alt(X3, Y3), E3, X3)
+    summary_rows: list[tuple[str, Interval]] = []
+
+    F_nat = f3(X3, Y3)
+    print_row("E.3 естественное", F_nat, E3, X3)
+    summary_rows.append(("E.3 естественное", F_nat))
+
+    F_equiv = f3_alt(X3, Y3)
+    print_row("E.4 равносильная", F_equiv, E3, X3)
+    summary_rows.append(("E.4 равносильная", F_equiv))
 
     centers = [(0.5, 0.5), (0, 0), (-1, -1), (2, 2), (-1, 2)]
     for c in centers:
-        F = F_mv_2d(f3, df3_dx, df3_dy, X3, Y3, c)
-        print_row(f"E.5 среднезначная c={c}", F, E3, X3)
+        F_mv = F_mv_2d(f3, df3_dx, df3_dy, X3, Y3, c)
+        name = f"E.5 среднезначная c={c}"
+        print_row(name, F_mv, E3, X3)
+        summary_rows.append((name, F_mv))
 
     F_bic_res = F_bic_2d(f3, df3_dx, df3_dy, X3, Y3)
     print_row("E.6 бицентрированная", F_bic_res, E3, X3)
+    summary_rows.append(("E.6 бицентрированная", F_bic_res))
 
     subdiv_grids = [(2, 1), (1, 2), (2, 2), (4, 4), (8, 8), (16, 16)]
     for nx, ny in subdiv_grids:
         F_sub = F_subdiv(f3, X3, Y3, nx, ny)
-        print_row(f"E.7 разбиение {nx}x{ny}", F_sub, E3, X3)
+        name = f"E.7 разбиение {nx}x{ny}"
+        print_row(name, F_sub, E3, X3)
+        summary_rows.append((name, F_sub))
 
     L1_F = 16.0
     L2_F = 12.0
@@ -241,6 +264,8 @@ def run_f3() -> None:
     print(
         f"L1_F*rad(X) + L2_F*rad(Y) = {lip_upper_bound_2d:.3f} >= rad(F_nat) = {rad_natural_f3:.3f}"
     )
+
+    print_summary(summary_rows, E3)
 
     visualization_f3(X3, Y3)
 
