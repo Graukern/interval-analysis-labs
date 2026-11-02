@@ -124,9 +124,28 @@ def run_f1() -> None:
         F1 = F_sl(f1, s1, X1, c)
         print_row(f"B.4 наклонная c={c}", F1, E1, X1)
 
-    visualization(f1, X1, "f1")
     F1 = F_bic(f1, df1, X1)
     print_row("B.5 бицентрированная", F1, E1, X1)
+
+    L_f = l_const(df1, X1)
+    L_F_nat = 45.0
+    L_F_horner = 27.0
+    rad_X = X1.rad()
+    rad_nat = f1(X1).rad()
+    rad_horner = f1_horner(X1).rad()
+
+    print()
+    print(f"L_f (точечная)                  : {L_f:.3f}")
+    print(f"L_F (естественное расширение)   : {L_F_nat:.3f}")
+    print(f"L_F (схема Горнера)             : {L_F_horner:.3f}")
+    print(f"Проверка с L_f:   rad(F) <= L_f * rad(X) = {L_f * rad_X:.3f}")
+    print(f"  Естественное:   rad = {rad_nat:.3f} <= {L_f * rad_X:.3f} -> {rad_nat <= L_f * rad_X + 1e-9}")
+    print(f"  Горнер:         rad = {rad_horner:.3f} <= {L_f * rad_X:.3f} -> {rad_horner <= L_f * rad_X + 1e-9}")
+    print(f"Проверка с L_F:   rad(F) <= L_F * rad(X)")
+    print(f"  Естественное:   rad = {rad_nat:.3f} <= {L_F_nat * rad_X:.3f} -> {rad_nat <= L_F_nat * rad_X + 1e-9}")
+    print(f"  Горнер:         rad = {rad_horner:.3f} <= {L_F_horner * rad_X:.3f} -> {rad_horner <= L_F_horner * rad_X + 1e-9}")
+
+    visualization(f1, X1, "f1")
 
 
 def f2(x):
