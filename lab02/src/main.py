@@ -3,8 +3,7 @@ from pathlib import Path
 
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.optimize import minimize_scalar
-
+from scipy.optimize import minimize, minimize_scalar
 
 class Interval:
     def __init__(self, lo: float, hi: float):
@@ -268,6 +267,28 @@ def exact_range(f, X:Interval) -> Interval:
     new_hi = -minimize_scalar(lambda x: -f(x), bounds=(xs[max(i_max - 1, 0)], xs[min(i_max + 1, N - 1)]), method="bounded").fun
 
     return Interval(min(ys.min(), new_lo), max(ys.max(), new_hi))
+
+
+def exact_range_2d(f, X: Interval, Y: Interval) -> Interval:
+    n_pts = 1001
+    xs = np.linspace(X.lo, X.hi, n_pts)
+    ys = np.linspace(Y.lo, Y.hi, n_pts)
+    X_grid, Y_grid = np.meshgrid(xs, ys)
+    Z_grid = f(X_grid, Y_grid)
+
+    bounds = [(X.lo, X.hi), (Y.lo, Y.hi)]
+
+    min_idx = np.unravel_index(np.argmin(Z_grid), Z_grid.shape)
+    x0_min = [X_grid[min_idx], Y_grid[min_idx]]
+    res_min = minimize(lambda v: f(v[0], v[1]), x0_min, bounds=bounds, method="L-BFGS-B")
+    val_min = min(float(Z_grid.min()), float(res_min.fun))
+
+    max_idx = np.unravel_index(np.argmax(Z_grid), Z_grid.shape)
+    x0_max = [X_grid[max_idx], Y_grid[max_idx]]
+    res_max = minimize(lambda v: -f(v[0], v[1]), x0_max, bounds=bounds, method="L-BFGS-B")
+    val_max = max(float(Z_grid.max()), float(-res_max.fun))
+
+    return Interval(val_min, val_max)
 
 
 def cut(x: float, bound: "Interval") -> float:
