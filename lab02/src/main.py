@@ -235,12 +235,22 @@ def visualization(f, X:Interval, func_name: str) -> None:
 
 def main():
     X = Interval(0, 3)
+    E = exact_range(f1, X)
+
+    print_row("B.1:", f1(X), E, X, 45)
+    print_row("B.2:", f1_horner(X), E, X, 27)
 
     for c in [0, 1.5, 3]:
-        mv = F_mv(f1, df1, X, c)
-        sl = F_sl(f1, s1, X, c)
+        F = F_mv(f1, df1, X, c)
+        print_row(f"B.3 среднезначная c={c}", F, E, X)
 
-        print(f"F_mv = {mv} | F_sl = {sl} | c = {c}")
-    
+    for c in [0, 1.5, 3]:
+        F = F_sl(f1, s1, X, c)
+        print_row(f"B.4 наклонная c={c}", F, E, X)
+
+    visualization(f1, X, "f1")
+    F = F_bic(f1, df1, X)
+    print_row("B.5 бицентрированная", F, E, X)
+
 if __name__ == "__main__":
     main()
