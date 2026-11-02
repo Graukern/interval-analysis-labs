@@ -256,16 +256,37 @@ def run_f3() -> None:
 
     centers = [(0.5, 0.5), (0, 0), (-1, -1), (2, 2), (-1, 2)]
     for c in centers:
-        F_mv = F_mv_2d(f3, df3_dx, df3_dy, X3, Y3, c)
+        F_c = F_mv_2d(f3, df3_dx, df3_dy, X3, Y3, c)
         name = f"E.5 среднезначная c={c}"
-        print_row(name, F_mv, E3, X3)
-        summary_rows.append((name, F_mv))
+        print_row(name, F_c, E3, X3)
+        summary_rows.append((name, F_c))
 
     F_bic_res = F_bic_2d(f3, df3_dx, df3_dy, X3, Y3)
     print_row("E.6 бицентрированная", F_bic_res, E3, X3)
     summary_rows.append(("E.6 бицентрированная", F_bic_res))
 
-    subdiv_grids = [(2, 1), (1, 2), (2, 2), (4, 4), (8, 8), (16, 16)]
+    print() 
+    print("E.7 разбиение бруса на подбрусья (по координатам):")
+    x_half = split(X3, 2)
+    y_half = split(Y3, 2)
+
+    F_x1 = f3(x_half[0], Y3)
+    F_x2 = f3(x_half[1], Y3)
+    F_sub_2x1 = hull(F_x1, F_x2)
+    print_row("  x-часть 1 [-1.0, 0.5] x Y", F_x1, E3, X3)
+    print_row("  x-часть 2 [ 0.5, 2.0] x Y", F_x2, E3, X3)
+    print_row("E.7 разбиение 2x1 (hull)", F_sub_2x1, E3, X3)
+    summary_rows.append(("E.7 разбиение 2x1", F_sub_2x1))
+
+    F_y1 = f3(X3, y_half[0])
+    F_y2 = f3(X3, y_half[1])
+    F_sub_1x2 = hull(F_y1, F_y2)
+    print_row("  y-часть 1 X x [-1.0, 0.5]", F_y1, E3, X3)
+    print_row("  y-часть 2 X x [ 0.5, 2.0]", F_y2, E3, X3)
+    print_row("E.7 разбиение 1x2 (hull)", F_sub_1x2, E3, X3)
+    summary_rows.append(("E.7 разбиение 1x2", F_sub_1x2))
+
+    subdiv_grids = [(2, 2), (4, 4), (8, 8), (16, 16)]
     for nx, ny in subdiv_grids:
         F_sub = F_subdiv(f3, X3, Y3, nx, ny)
         name = f"E.7 разбиение {nx}x{ny}"
@@ -280,15 +301,17 @@ def run_f3() -> None:
     L1_f = max(abs(dfx_range.lo), abs(dfx_range.hi))
     L2_f = max(abs(dfy_range.lo), abs(dfy_range.hi))
 
-    lip_upper_bound_2d = L1_F * X3.rad() + L2_F * Y3.rad()
-    rad_natural_f3 = f3(X3, Y3).rad()
+    rad_X = X3.rad()
+    rad_Y = Y3.rad()
+    rad_nat = F_nat.rad()
+    bound_f = L1_f * rad_X + L2_f * rad_Y
+    bound_F = L1_F * rad_X + L2_F * rad_Y
 
     print()
-    print(f"L_f  (точечные)              : L1_f = {L1_f:.3f}, L2_f = {L2_f:.3f}")
-    print(f"L_F  (интервальные)          : L1_F = {L1_F:.3f}, L2_F = {L2_F:.3f}")
-    print(
-        f"L1_F*rad(X) + L2_F*rad(Y) = {lip_upper_bound_2d:.3f} >= rad(F_nat) = {rad_natural_f3:.3f}"
-    )
+    print(f"L_f (точечные)                  : L1_f = {L1_f:.3f}, L2_f = {L2_f:.3f}")
+    print(f"L_F (интервальные)              : L1_F = {L1_F:.3f}, L2_F = {L2_F:.3f}")
+    print(f"Проверка с L_f:   rad(F_nat) = {rad_nat:.3f} <= L1_f*rad(X) + L2_f*rad(Y) = {bound_f:.3f} -> {rad_nat <= bound_f + 1e-9}")
+    print(f"Проверка с L_F:   rad(F_nat) = {rad_nat:.3f} <= L1_F*rad(X) + L2_F*rad(Y) = {bound_F:.3f} -> {rad_nat <= bound_F + 1e-9}")
 
     print_summary(summary_rows, E3)
 
@@ -555,7 +578,6 @@ def main() -> None:
     print()
     
     run_f3()
-
 
 
 if __name__ == "__main__":
