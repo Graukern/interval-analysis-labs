@@ -167,6 +167,16 @@ def run_f2() -> None:
     F = F_bic(f2, df2, X2)
     print_row("B.5 f2 бицентрированная", F, E2, X2)
 
+    L_f = l_const(df2, X2)
+    L_F = 20.0
+    lip_upper_bound = L_F * X2.rad()
+    rad_natural = f2(X2).rad()
+
+    print()
+    print(f"L_f (точечная)              : {L_f:.3f}")
+    print(f"L_F (интервальное расширение): {L_F:.3f}")
+    print(f"L_F * rad(X) = {lip_upper_bound:.3f} >= rad(F_nat) = {rad_natural:.3f}")
+
     visualization(f2, X2, "f2")
 
 
