@@ -145,6 +145,10 @@ def df2(x):
     return (x ** 2) * (3 * np.cos(x) - x * np.sin(x))
 
 
+def s2(X: "Interval", c: float) -> "Interval":
+    return (X ** 2 + X * c + c ** 2) * icos(X) + (c ** 3) * ((-1) * isin(X))
+
+
 def run_f2() -> None:
     X2 = Interval(-2, 2)
     E2 = exact_range(f2, X2)
@@ -156,6 +160,10 @@ def run_f2() -> None:
         F = F_mv(f2, df2, X2, c)
         print_row(f"B.3 f2 среднезначная c={c}", F, E2, X2)
 
+    for c in [-2, -1, 0, 1, 2]:
+        F = F_sl(f2, s2, X2, c)
+        print_row(f"B.4 f2 наклонная c={c}", F, E2, X2)
+        
     visualization(f2, X2, "f2")
 
 
