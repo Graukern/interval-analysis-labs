@@ -163,7 +163,10 @@ def run_f2() -> None:
     for c in [-2, -1, 0, 1, 2]:
         F = F_sl(f2, s2, X2, c)
         print_row(f"B.4 f2 наклонная c={c}", F, E2, X2)
-        
+
+    F = F_bic(f2, df2, X2)
+    print_row("B.5 f2 бицентрированная", F, E2, X2)
+
     visualization(f2, X2, "f2")
 
 
