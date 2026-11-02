@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import minimize, minimize_scalar
 
+
 class Interval:
     def __init__(self, lo: float, hi: float):
         if lo > hi: 
@@ -187,6 +188,19 @@ def f3_alt(x, y):
     return x * (x * (y + 1) - y ** 2)
 
 
+def df3_dx(x, y):
+    return 2 * x * y - y ** 2 + 2 * x
+
+
+def df3_dy(x, y):
+    return x ** 2 - 2 * x * y
+
+
+def F_mv_2d(f, dfx, dfy, X: Interval, Y: Interval, c: tuple[float, float]) -> Interval:
+    cx, cy = c
+    return f(cx, cy) + dfx(X, Y) * (X - cx) + dfy(X, Y) * (Y - cy)
+
+
 def run_f3() -> None:
     X3 = Interval(-1, 2)
     Y3 = Interval(-1, 2)
@@ -196,6 +210,11 @@ def run_f3() -> None:
 
     print_row("E.3 естественное", f3(X3, Y3), E3, X3)
     print_row("E.4 равносильная", f3_alt(X3, Y3), E3, X3)
+
+    centers = [(0.5, 0.5), (0, 0), (-1, -1), (2, 2), (-1, 2)]
+    for c in centers:
+        F = F_mv_2d(f3, df3_dx, df3_dy, X3, Y3, c)
+        print_row(f"E.5 среднезначная c={c}", F, E3, X3)
 
     visualization_f3(X3, Y3)
 
@@ -334,7 +353,7 @@ def print_row(name: str, F: Interval, E: Interval, X: Interval, L: float | None 
     lip_val = f"{lip_bound(F, L, X)}" if L is not None else "-"
     incl_val = f"{contains(F, E)}"
     print(
-        f"{name:<25} | F: [{F.lo:8.3f}, {F.hi:8.3f}] | rad: {F.rad():7.3f} | dist: {dist(F, E):7.3f} | incl: {incl_val:<5} | lip: {lip_val}"
+        f"{name:<32} | F: [{F.lo:8.3f}, {F.hi:8.3f}] | rad: {F.rad():7.3f} | dist: {dist(F, E):7.3f} | incl: {incl_val:<5} | lip: {lip_val}"
     )
 
 
