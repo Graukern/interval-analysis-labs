@@ -218,7 +218,12 @@ def run_f3() -> None:
 
     F_bic_res = F_bic_2d(f3, df3_dx, df3_dy, X3, Y3)
     print_row("E.6 бицентрированная", F_bic_res, E3, X3)
-    
+
+    subdiv_grids = [(2, 1), (1, 2), (2, 2), (4, 4), (8, 8), (16, 16)]
+    for nx, ny in subdiv_grids:
+        F_sub = F_subdiv(f3, X3, Y3, nx, ny)
+        print_row(f"E.7 разбиение {nx}x{ny}", F_sub, E3, X3)
+        
     visualization_f3(X3, Y3)
 
 
@@ -380,6 +385,29 @@ def print_row(name: str, F: Interval, E: Interval, X: Interval, L: float | None 
     print(
         f"{name:<32} | F: [{F.lo:8.3f}, {F.hi:8.3f}] | rad: {F.rad():7.3f} | dist: {dist(F, E):7.3f} | incl: {incl_val:<5} | lip: {lip_val}"
     )
+
+
+def hull(a: Interval, b: Interval) -> Interval:
+    return Interval(min(a.lo, b.lo), max(a.hi, b.hi))
+
+
+def split(I: Interval, k: int) -> list[Interval]:
+    edges = np.linspace(I.lo, I.hi, k + 1)
+    return [Interval(float(edges[i]), float(edges[i + 1])) for i in range(k)]
+
+
+def F_subdiv(f, X: Interval, Y: Interval, nx: int, ny: int) -> Interval:
+    x_parts = split(X, nx)
+    y_parts = split(Y, ny)
+
+    res: Interval | None = None
+    for xi in x_parts:
+        for yj in y_parts:
+            f_part = f(xi, yj)
+            res = f_part if res is None else hull(res, f_part)
+
+    assert res is not None
+    return res
 
 
 def visualization(f, X:Interval, func_name: str) -> None:
