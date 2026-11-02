@@ -183,9 +183,20 @@ def f3(x, y):
     return x ** 2 * y - x * y ** 2 + x ** 2
 
 
+def f3_alt(x, y):
+    return x * (x * (y + 1) - y ** 2)
+
+
 def run_f3() -> None:
     X3 = Interval(-1, 2)
     Y3 = Interval(-1, 2)
+
+    E3 = exact_range_2d(f3, X3, Y3)
+    print(f"E3 (точная область значений) = [{E3.lo:.3f}, {E3.hi:.3f}]")
+
+    print_row("E.3 естественное", f3(X3, Y3), E3, X3)
+    print_row("E.4 равносильная", f3_alt(X3, Y3), E3, X3)
+
     visualization_f3(X3, Y3)
 
 
@@ -325,6 +336,7 @@ def print_row(name: str, F: Interval, E: Interval, X: Interval, L: float | None 
     print(
         f"{name:<25} | F: [{F.lo:8.3f}, {F.hi:8.3f}] | rad: {F.rad():7.3f} | dist: {dist(F, E):7.3f} | incl: {incl_val:<5} | lip: {lip_val}"
     )
+
 
 def visualization(f, X:Interval, func_name: str) -> None:
     N = 300
