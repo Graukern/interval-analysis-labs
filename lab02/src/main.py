@@ -186,6 +186,20 @@ def intersect(a: "Interval", b: "Interval") -> "Interval":
     return Interval(new_lo, new_hi)
 
 
+def l_const(df, X: Interval) -> float:
+    df_bounds = exact_range(df, X)
+    return max(abs(df_bounds.lo), abs(df_bounds.hi))
+
+
+def lip_bound(F: Interval, L, X: Interval) -> bool:
+    return F.rad() <= X.rad() * L
+
+
+def print_row(name: str, F: Interval, E: Interval, X: Interval, L: float | None = None) -> None:
+    lip_val = f"{lip_bound(F, L, X)}" if L is not None else "-"
+    print(f"{name:<25} | F: [{F.lo:.3f}, {F.hi:.3f}] | rad: {F.rad():.3f} | dist: {dist(F, E):.3f} | lip: {lip_val}")
+
+
 def visualization(f, X:Interval, func_name: str) -> None:
     N = 300
     x_f = np.linspace(X.lo, X.hi, N)
