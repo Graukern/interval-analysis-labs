@@ -109,8 +109,54 @@ def s1(X: "Interval", c: float) -> "Interval":
     return X ** 2 + X * c + c ** 2 - 3 * X - 3 * c
 
 
-def f2(x: float) -> float:
-    return x ** 3 * np.cos(x) 
+def run_f6() -> None:
+    X1 = Interval(0, 3)
+    E1 = exact_range(f1, X1)
+
+    print_row("B.1 естественное", f1(X1), E1, X1, 45)
+    print_row("B.2 Горнер", f1_horner(X1), E1, X1, 27)
+
+    for c in [0, 1.5, 3]:
+        F1 = F_mv(f1, df1, X1, c)
+        print_row(f"B.3 среднезначная c={c}", F1, E1, X1)
+
+    for c in [0, 1.5, 3]:
+        F1 = F_sl(f1, s1, X1, c)
+        print_row(f"B.4 наклонная c={c}", F1, E1, X1)
+
+    visualization(f1, X1, "f1")
+    F1 = F_bic(f1, df1, X1)
+    print_row("B.5 бицентрированная", F1, E1, X1)
+
+
+def f2(x):
+    cos_part = icos(x) if isinstance(x, Interval) else np.cos(x)
+    return x ** 3 * cos_part
+
+
+def f2_alt(x):
+    cos_part = icos(x) if isinstance(x, Interval) else np.cos(x)
+    return (x * x) * (x * cos_part)
+
+
+def df2(x):
+    if isinstance(x, Interval):
+        return (x ** 2) * (3 * icos(x) - x * isin(x))
+    return (x ** 2) * (3 * np.cos(x) - x * np.sin(x))
+
+
+def run_f2() -> None:
+    X2 = Interval(-2, 2)
+    E2 = exact_range(f2, X2)
+
+    print_row("B.1 f2 естественное", f2(X2), E2, X2, 20)
+    print_row("B.2 f2 эквивалентная", f2_alt(X2), E2, X2, 20)
+
+    for c in [-2, -1, 0, 1, 2]:
+        F = F_mv(f2, df2, X2, c)
+        print_row(f"B.3 f2 среднезначная c={c}", F, E2, X2)
+
+    visualization(f2, X2, "f2")
 
 
 def F_mv(f, df, X: "Interval", c: float) -> "Interval":
@@ -151,6 +197,27 @@ def icos(x: Interval) -> Interval:
     new_lo = -1 if has_valley else min(math.cos(x.lo), math.cos(x.hi))
     new_hi = 1 if has_peak else max(math.cos(x.lo), math.cos(x.hi))
         
+    return Interval(new_lo, new_hi)
+
+
+def isin(x: Interval) -> Interval:
+    has_valley = False
+    has_peak = False
+
+    k_lo = math.floor(x.lo / (2 * math.pi))
+    k_hi = math.ceil(x.hi / (2 * math.pi))
+
+    for k in range(k_lo, k_hi + 1):
+        if x.lo <= -math.pi / 2 + 2 * math.pi * k <= x.hi:
+            has_valley = True
+        if x.lo <= math.pi / 2 + 2 * math.pi * k <= x.hi:
+            has_peak = True
+        if has_valley and has_peak:
+            break
+
+    new_lo = -1 if has_valley else min(math.sin(x.lo), math.sin(x.hi))
+    new_hi = 1 if has_peak else max(math.sin(x.lo), math.sin(x.hi))
+
     return Interval(new_lo, new_hi)
 
 
