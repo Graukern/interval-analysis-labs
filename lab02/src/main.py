@@ -216,6 +216,9 @@ def run_f3() -> None:
         F = F_mv_2d(f3, df3_dx, df3_dy, X3, Y3, c)
         print_row(f"E.5 среднезначная c={c}", F, E3, X3)
 
+    F_bic_res = F_bic_2d(f3, df3_dx, df3_dy, X3, Y3)
+    print_row("E.6 бицентрированная", F_bic_res, E3, X3)
+    
     visualization_f3(X3, Y3)
 
 
@@ -237,6 +240,28 @@ def F_bic(f, df, X: "Interval") -> "Interval":
     c_hi = X.mid() + p * X.rad()
 
     return intersect(F_mv(f, df, X, c_lo), F_mv(f, df, X, c_hi))
+
+
+def F_bic_2d(f, dfx, dfy, X: Interval, Y: Interval) -> Interval:
+    dfx_val = dfx(X, Y)
+    dfy_val = dfy(X, Y)
+
+    bound = Interval(-1.0, 1.0)
+    px = cut(dfx_val.mid() / dfx_val.rad(), bound)
+    py = cut(dfy_val.mid() / dfy_val.rad(), bound)
+
+    cx_star = X.mid() - px * X.rad()
+    cy_star = Y.mid() - py * Y.rad()
+    c_star = (cx_star, cy_star)
+
+    cx_star2 = X.mid() + px * X.rad()
+    cy_star2 = Y.mid() + py * Y.rad()
+    c_star2 = (cx_star2, cy_star2)
+
+    return intersect(
+        F_mv_2d(f, dfx, dfy, X, Y, c_star),
+        F_mv_2d(f, dfx, dfy, X, Y, c_star2),
+    )
 
 
 def icos(x: Interval) -> Interval:
