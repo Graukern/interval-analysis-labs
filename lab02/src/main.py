@@ -172,6 +172,11 @@ def run_f2() -> None:
     X2 = Interval(-2, 2)
     E2 = exact_range(f2, X2)
 
+    res_opt = minimize_scalar(lambda x: -f2(x), bounds=(0.5, 1.9), method="bounded")
+    x_local_max = float(res_opt.x)
+    f_local_max = float(-res_opt.fun)
+    print(f"Особенности на X2: локальный максимум f2({x_local_max:.3f}) = {f_local_max:.3f} (симметричный минимум в {-x_local_max:.3f})")
+
     print_row("B.1 f2 естественное", f2(X2), E2, X2, 20)
     print_row("B.2 f2 эквивалентная", f2_alt(X2), E2, X2, 20)
 
