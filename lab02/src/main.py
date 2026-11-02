@@ -223,7 +223,25 @@ def run_f3() -> None:
     for nx, ny in subdiv_grids:
         F_sub = F_subdiv(f3, X3, Y3, nx, ny)
         print_row(f"E.7 разбиение {nx}x{ny}", F_sub, E3, X3)
-        
+
+    L1_F = 16.0
+    L2_F = 12.0
+
+    dfx_range = exact_range_2d(df3_dx, X3, Y3)
+    dfy_range = exact_range_2d(df3_dy, X3, Y3)
+    L1_f = max(abs(dfx_range.lo), abs(dfx_range.hi))
+    L2_f = max(abs(dfy_range.lo), abs(dfy_range.hi))
+
+    lip_upper_bound_2d = L1_F * X3.rad() + L2_F * Y3.rad()
+    rad_natural_f3 = f3(X3, Y3).rad()
+
+    print()
+    print(f"L_f  (точечные)              : L1_f = {L1_f:.3f}, L2_f = {L2_f:.3f}")
+    print(f"L_F  (интервальные)          : L1_F = {L1_F:.3f}, L2_F = {L2_F:.3f}")
+    print(
+        f"L1_F*rad(X) + L2_F*rad(Y) = {lip_upper_bound_2d:.3f} >= rad(F_nat) = {rad_natural_f3:.3f}"
+    )
+
     visualization_f3(X3, Y3)
 
 
