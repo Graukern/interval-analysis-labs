@@ -193,13 +193,14 @@ def run_f2() -> None:
 
     L_f = l_const(df2, X2)
     L_F = 20.0
-    lip_upper_bound = L_F * X2.rad()
-    rad_natural = f2(X2).rad()
+    rad_X = X2.rad()
+    rad_nat = f2(X2).rad()
 
     print()
-    print(f"L_f (точечная)              : {L_f:.3f}")
-    print(f"L_F (интервальное расширение): {L_F:.3f}")
-    print(f"L_F * rad(X) = {lip_upper_bound:.3f} >= rad(F_nat) = {rad_natural:.3f}")
+    print(f"L_f (точечная)                  : {L_f:.3f}")
+    print(f"L_F (интервальное расширение)   : {L_F:.3f}")
+    print(f"Проверка с L_f:   rad(F_nat) = {rad_nat:.3f} <= L_f * rad(X) = {L_f * rad_X:.3f} -> {rad_nat <= L_f * rad_X + 1e-9}")
+    print(f"Проверка с L_F:   rad(F_nat) = {rad_nat:.3f} <= L_F * rad(X) = {L_F * rad_X:.3f} -> {rad_nat <= L_F * rad_X + 1e-9}")   
 
     visualization(f2, X2, "f2")
 
