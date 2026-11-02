@@ -180,6 +180,16 @@ def run_f2() -> None:
     visualization(f2, X2, "f2")
 
 
+def f3(x, y):
+    return x ** 2 * y - x * y ** 2 + x ** 2
+
+
+def run_f3() -> None:
+    X3 = Interval(-1, 2)
+    Y3 = Interval(-1, 2)
+    visualization_f3(X3, Y3)
+
+
 def F_mv(f, df, X: "Interval", c: float) -> "Interval":
     return f(c) + df(X) * (X - c)
 
@@ -328,10 +338,51 @@ def visualization(f, X:Interval, func_name: str) -> None:
     plt.close()
 
 
+def visualization_f3(X: Interval, Y: Interval) -> None:
+    n_pts = 200
+    x_vals = np.linspace(X.lo, X.hi, n_pts)
+    y_vals = np.linspace(Y.lo, Y.hi, n_pts)
+    X_grid, Y_grid = np.meshgrid(x_vals, y_vals)
+    Z_grid = f3(X_grid, Y_grid)
+
+    figures_dir = Path(__file__).resolve().parent.parent / "report" / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection="3d")
+    surf = ax.plot_surface(X_grid, Y_grid, Z_grid, cmap="viridis", edgecolor="none", alpha=0.9)
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$y$")
+    ax.set_zlabel("$f_3(x, y)$")
+    ax.set_title(r"Поверхность $f_3(x, y) = x^2 y - x y^2 + x^2$")
+    fig.colorbar(surf, ax=ax, shrink=0.5, aspect=10, pad=0.1)
+    plt.tight_layout()
+    plt.savefig(figures_dir / "f3_surface.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    contour_filled = ax.contourf(X_grid, Y_grid, Z_grid, levels=25, cmap="viridis")
+    contour_lines = ax.contour(X_grid, Y_grid, Z_grid, levels=25, colors="black", linewidths=0.6, alpha=0.7)
+    ax.clabel(contour_lines, inline=True, fontsize=8, fmt="%.1f")
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$y$")
+    ax.set_title(r"Линии уровня $f_3(x, y) = x^2 y - x y^2 + x^2$")
+    fig.colorbar(contour_filled, ax=ax, label="$f_3(x, y)$")
+    ax.grid(True, linestyle="--", alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(figures_dir / "f3_contour.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
 def main() -> None:
     run_f1()
     print()
+    
     run_f2()
+    print()
+    
+    run_f3()
+
 
 
 if __name__ == "__main__":
