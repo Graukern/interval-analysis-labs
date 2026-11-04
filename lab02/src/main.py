@@ -1,0 +1,584 @@
+import math
+from pathlib import Path
+
+import numpy as np
+from matplotlib import pyplot as plt
+from scipy.optimize import minimize, minimize_scalar
+
+
+class Interval:
+    def __init__(self, lo: float, hi: float):
+        if lo > hi: 
+            raise ValueError(f"Нижняя граница больше верхней lo = {lo}, hi = {hi}.")
+        self.lo = lo
+        self.hi = hi
+
+
+    def mid(self) -> float:
+        return (self.lo + self.hi) / 2.0 
+
+
+    def rad(self) -> float:
+        return (self.hi - self.lo) / 2.0
+
+
+    def wid(self) -> float:
+        return self.hi - self.lo
+
+
+    def __add__(self, other: "Interval") -> "Interval":
+        if not isinstance(other, Interval): 
+            other = Interval(other, other)
+
+        new_lo = self.lo + other.lo
+        new_hi = self.hi + other.hi
+        return Interval(new_lo, new_hi)
+
+
+    def __radd__ (self, other):
+        return self + other
+
+
+    def __sub__(self, other: "Interval") -> "Interval":
+        if not isinstance(other, Interval):
+            other = Interval(other, other)
+
+        new_lo = self.lo - other.hi
+        new_hi = self.hi - other.lo
+        return Interval(new_lo, new_hi)
+
+
+    def __rsub__(self, other):
+        if not isinstance(other, Interval):
+            other = Interval(other, other)
+
+        new_lo = other.lo - self.hi
+        new_hi = other.hi - self.lo
+        return Interval(new_lo, new_hi)
+
+
+    def __mul__(self, other: "Interval") -> "Interval":
+        if not isinstance(other, Interval): 
+            other = Interval(other, other)
+        comb = []
+
+        for i in [self.lo, self.hi]:
+            for j in [other.lo, other.hi]:
+                comb.append(i * j)
+
+        new_lo = min(comb)
+        new_hi = max(comb)
+        return Interval(new_lo, new_hi)
+
+
+    def __rmul__(self, other):
+        return self * other
+
+    
+    def __pow__(self, n: int) -> "Interval":
+        if not isinstance(n, int):
+            raise TypeError(f"Степень не целое число n={n}.")
+        elif n < 0:
+            raise ValueError(f"Степень отрицательная n={n}.")
+        elif n == 0:
+            return Interval(1, 1)
+
+        new_interval = self
+        for _ in range(1, n):
+            new_interval *= self
+
+        return new_interval
+        
+    def __repr__(self) -> str:
+        return f"[{self.lo}, {self.hi}]"
+
+
+def f1(x: float) -> float:
+    return x ** 3 - 3 * x ** 2 + 2
+
+
+def f1_horner(x: float) -> float:
+    return ((x - 3) * x + 0) * x + 2
+
+
+def df1(x: float):
+    return 3 * x ** 2 - 6 * x
+
+
+def s1(X: "Interval", c: float) -> "Interval":
+    return X ** 2 + X * c + c ** 2 - 3 * X - 3 * c
+
+
+def run_f1() -> None:
+    X1 = Interval(0, 3)
+    E1 = exact_range(f1, X1)
+
+    print_row("B.1 естественное", f1(X1), E1, X1, 45)
+    print_row("B.2 Горнер", f1_horner(X1), E1, X1, 27)
+
+    for c in [0, 1.5, 3]:
+        F1 = F_mv(f1, df1, X1, c)
+        print_row(f"B.3 среднезначная c={c}", F1, E1, X1)
+
+    for c in [0, 1.5, 3]:
+        F1 = F_sl(f1, s1, X1, c)
+        print_row(f"B.4 наклонная c={c}", F1, E1, X1)
+
+    F1 = F_bic(f1, df1, X1)
+    print_row("B.5 бицентрированная", F1, E1, X1)
+
+    L_f = l_const(df1, X1)
+    L_F_nat = 45.0
+    L_F_horner = 27.0
+    rad_X = X1.rad()
+    rad_nat = f1(X1).rad()
+    rad_horner = f1_horner(X1).rad()
+
+    print()
+    print(f"L_f (точечная)                  : {L_f:.3f}")
+    print(f"L_F (естественное расширение)   : {L_F_nat:.3f}")
+    print(f"L_F (схема Горнера)             : {L_F_horner:.3f}")
+    print(f"Проверка с L_f:   rad(F) <= L_f * rad(X) = {L_f * rad_X:.3f}")
+    print(f"  Естественное:   rad = {rad_nat:.3f} <= {L_f * rad_X:.3f} -> {rad_nat <= L_f * rad_X + 1e-9}")
+    print(f"  Горнер:         rad = {rad_horner:.3f} <= {L_f * rad_X:.3f} -> {rad_horner <= L_f * rad_X + 1e-9}")
+    print(f"Проверка с L_F:   rad(F) <= L_F * rad(X)")
+    print(f"  Естественное:   rad = {rad_nat:.3f} <= {L_F_nat * rad_X:.3f} -> {rad_nat <= L_F_nat * rad_X + 1e-9}")
+    print(f"  Горнер:         rad = {rad_horner:.3f} <= {L_F_horner * rad_X:.3f} -> {rad_horner <= L_F_horner * rad_X + 1e-9}")
+
+    visualization(f1, X1, "f1")
+
+
+def f2(x):
+    cos_part = icos(x) if isinstance(x, Interval) else np.cos(x)
+    return x ** 3 * cos_part
+
+
+def f2_alt(x):
+    cos_part = icos(x) if isinstance(x, Interval) else np.cos(x)
+    return (x * x) * (x * cos_part)
+
+
+def df2(x):
+    if isinstance(x, Interval):
+        return (x ** 2) * (3 * icos(x) - x * isin(x))
+    return (x ** 2) * (3 * np.cos(x) - x * np.sin(x))
+
+
+def s2(X: "Interval", c: float) -> "Interval":
+    return (X ** 2 + X * c + c ** 2) * icos(X) + (c ** 3) * ((-1) * isin(X))
+
+
+def run_f2() -> None:
+    X2 = Interval(-2, 2)
+    E2 = exact_range(f2, X2)
+
+    res_opt = minimize_scalar(lambda x: -f2(x), bounds=(0.5, 1.9), method="bounded")
+    x_local_max = float(res_opt.x)
+    f_local_max = float(-res_opt.fun)
+    print(f"Особенности на X2: локальный максимум f2({x_local_max:.3f}) = {f_local_max:.3f} (симметричный минимум в {-x_local_max:.3f})")
+
+    print_row("B.1 f2 естественное", f2(X2), E2, X2, 20)
+    print_row("B.2 f2 эквивалентная", f2_alt(X2), E2, X2, 20)
+
+    for c in [-2, -1, 0, 1, 2]:
+        F = F_mv(f2, df2, X2, c)
+        print_row(f"B.3 f2 среднезначная c={c}", F, E2, X2)
+
+    for c in [-2, -1, 0, 1, 2]:
+        F = F_sl(f2, s2, X2, c)
+        print_row(f"B.4 f2 наклонная c={c}", F, E2, X2)
+
+    F = F_bic(f2, df2, X2)
+    print_row("B.5 f2 бицентрированная", F, E2, X2)
+
+    L_f = l_const(df2, X2)
+    L_F = 20.0
+    rad_X = X2.rad()
+    rad_nat = f2(X2).rad()
+
+    print()
+    print(f"L_f (точечная)                  : {L_f:.3f}")
+    print(f"L_F (интервальное расширение)   : {L_F:.3f}")
+    print(f"Проверка с L_f:   rad(F_nat) = {rad_nat:.3f} <= L_f * rad(X) = {L_f * rad_X:.3f} -> {rad_nat <= L_f * rad_X + 1e-9}")
+    print(f"Проверка с L_F:   rad(F_nat) = {rad_nat:.3f} <= L_F * rad(X) = {L_F * rad_X:.3f} -> {rad_nat <= L_F * rad_X + 1e-9}")   
+
+    visualization(f2, X2, "f2")
+
+
+def f3(x, y):
+    return x ** 2 * y - x * y ** 2 + x ** 2
+
+
+def f3_alt(x, y):
+    return x * (x * (y + 1) - y ** 2)
+
+
+def df3_dx(x, y):
+    return 2 * x * y - y ** 2 + 2 * x
+
+
+def df3_dy(x, y):
+    return x ** 2 - 2 * x * y
+
+
+def F_mv_2d(f, dfx, dfy, X: Interval, Y: Interval, c: tuple[float, float]) -> Interval:
+    cx, cy = c
+    return f(cx, cy) + dfx(X, Y) * (X - cx) + dfy(X, Y) * (Y - cy)
+
+
+def print_summary(rows: list[tuple[str, Interval]], E: Interval) -> None:
+    sorted_rows = sorted(rows, key=lambda item: dist(item[1], E))
+    print()
+    print("=" * 66)
+    print(f"{'#':<3} | {'Метод':<32} | {'dist':<10} | {'rad':<10}")
+    print("-" * 66)
+    for rank, (name, F) in enumerate(sorted_rows, start=1):
+        print(f"{rank:<3} | {name:<32} | {dist(F, E):<10.3f} | {F.rad():<10.3f}")
+    print("=" * 66)
+
+
+def run_f3() -> None:
+    X3 = Interval(-1, 2)
+    Y3 = Interval(-1, 2)
+
+    E3 = exact_range_2d(f3, X3, Y3)
+    print(f"E3 (точная область значений) = [{E3.lo:.3f}, {E3.hi:.3f}]")
+
+    summary_rows: list[tuple[str, Interval]] = []
+
+    F_nat = f3(X3, Y3)
+    print_row("E.3 естественное", F_nat, E3, X3)
+    summary_rows.append(("E.3 естественное", F_nat))
+
+    F_equiv = f3_alt(X3, Y3)
+    print_row("E.4 равносильная", F_equiv, E3, X3)
+    summary_rows.append(("E.4 равносильная", F_equiv))
+
+    centers = [(0.5, 0.5), (0, 0), (-1, -1), (2, 2), (-1, 2)]
+    for c in centers:
+        F_c = F_mv_2d(f3, df3_dx, df3_dy, X3, Y3, c)
+        name = f"E.5 среднезначная c={c}"
+        print_row(name, F_c, E3, X3)
+        summary_rows.append((name, F_c))
+
+    F_bic_res = F_bic_2d(f3, df3_dx, df3_dy, X3, Y3)
+    print_row("E.6 бицентрированная", F_bic_res, E3, X3)
+    summary_rows.append(("E.6 бицентрированная", F_bic_res))
+
+    print() 
+    print("E.7 разбиение бруса на подбрусья (по координатам):")
+    x_half = split(X3, 2)
+    y_half = split(Y3, 2)
+
+    F_x1 = f3(x_half[0], Y3)
+    F_x2 = f3(x_half[1], Y3)
+    F_sub_2x1 = hull(F_x1, F_x2)
+    print_row("  x-часть 1 [-1.0, 0.5] x Y", F_x1, E3, X3)
+    print_row("  x-часть 2 [ 0.5, 2.0] x Y", F_x2, E3, X3)
+    print_row("E.7 разбиение 2x1 (hull)", F_sub_2x1, E3, X3)
+    summary_rows.append(("E.7 разбиение 2x1", F_sub_2x1))
+
+    F_y1 = f3(X3, y_half[0])
+    F_y2 = f3(X3, y_half[1])
+    F_sub_1x2 = hull(F_y1, F_y2)
+    print_row("  y-часть 1 X x [-1.0, 0.5]", F_y1, E3, X3)
+    print_row("  y-часть 2 X x [ 0.5, 2.0]", F_y2, E3, X3)
+    print_row("E.7 разбиение 1x2 (hull)", F_sub_1x2, E3, X3)
+    summary_rows.append(("E.7 разбиение 1x2", F_sub_1x2))
+
+    subdiv_grids = [(2, 2), (4, 4), (8, 8), (16, 16)]
+    for nx, ny in subdiv_grids:
+        F_sub = F_subdiv(f3, X3, Y3, nx, ny)
+        name = f"E.7 разбиение {nx}x{ny}"
+        print_row(name, F_sub, E3, X3)
+        summary_rows.append((name, F_sub))
+
+    L1_F = 16.0
+    L2_F = 12.0
+
+    dfx_range = exact_range_2d(df3_dx, X3, Y3)
+    dfy_range = exact_range_2d(df3_dy, X3, Y3)
+    L1_f = max(abs(dfx_range.lo), abs(dfx_range.hi))
+    L2_f = max(abs(dfy_range.lo), abs(dfy_range.hi))
+
+    rad_X = X3.rad()
+    rad_Y = Y3.rad()
+    rad_nat = F_nat.rad()
+    bound_f = L1_f * rad_X + L2_f * rad_Y
+    bound_F = L1_F * rad_X + L2_F * rad_Y
+
+    print()
+    print(f"L_f (точечные)                  : L1_f = {L1_f:.3f}, L2_f = {L2_f:.3f}")
+    print(f"L_F (интервальные)              : L1_F = {L1_F:.3f}, L2_F = {L2_F:.3f}")
+    print(f"Проверка с L_f:   rad(F_nat) = {rad_nat:.3f} <= L1_f*rad(X) + L2_f*rad(Y) = {bound_f:.3f} -> {rad_nat <= bound_f + 1e-9}")
+    print(f"Проверка с L_F:   rad(F_nat) = {rad_nat:.3f} <= L1_F*rad(X) + L2_F*rad(Y) = {bound_F:.3f} -> {rad_nat <= bound_F + 1e-9}")
+
+    print_summary(summary_rows, E3)
+
+    visualization_f3(X3, Y3)
+
+
+def F_mv(f, df, X: "Interval", c: float) -> "Interval":
+    return f(c) + df(X) * (X - c)
+
+
+def F_sl(f, s, X: "Interval", c: float) -> "Interval":
+    return f(c) + s(X, c) * (X - c)
+
+
+def F_bic(f, df, X: "Interval") -> "Interval":
+    df_interval = df(X)
+    df_mid = df_interval.mid()
+    df_rad = df_interval.rad()
+    p = cut(df_mid / df_rad, Interval(-1, 1))
+
+    c_lo = X.mid() - p * X.rad()
+    c_hi = X.mid() + p * X.rad()
+
+    return intersect(F_mv(f, df, X, c_lo), F_mv(f, df, X, c_hi))
+
+
+def F_bic_2d(f, dfx, dfy, X: Interval, Y: Interval) -> Interval:
+    dfx_val = dfx(X, Y)
+    dfy_val = dfy(X, Y)
+
+    bound = Interval(-1.0, 1.0)
+    px = cut(dfx_val.mid() / dfx_val.rad(), bound)
+    py = cut(dfy_val.mid() / dfy_val.rad(), bound)
+
+    cx_star = X.mid() - px * X.rad()
+    cy_star = Y.mid() - py * Y.rad()
+    c_star = (cx_star, cy_star)
+
+    cx_star2 = X.mid() + px * X.rad()
+    cy_star2 = Y.mid() + py * Y.rad()
+    c_star2 = (cx_star2, cy_star2)
+
+    return intersect(
+        F_mv_2d(f, dfx, dfy, X, Y, c_star),
+        F_mv_2d(f, dfx, dfy, X, Y, c_star2),
+    )
+
+
+def icos(x: Interval) -> Interval:
+    has_valley = False
+    has_peak = False
+
+    k_lo = math.floor(x.lo / (2 * math.pi))
+    k_hi = math.ceil(x.hi / (2 * math.pi))
+
+    for k in range(k_lo, k_hi + 1):
+        if x.lo <= math.pi + 2 * math.pi * k <= x.hi:
+            has_valley = True
+        if x.lo <= 2 * math.pi * k <= x.hi:
+            has_peak = True
+        if has_valley and has_peak:
+            break
+
+    new_lo = -1 if has_valley else min(math.cos(x.lo), math.cos(x.hi))
+    new_hi = 1 if has_peak else max(math.cos(x.lo), math.cos(x.hi))
+        
+    return Interval(new_lo, new_hi)
+
+
+def isin(x: Interval) -> Interval:
+    has_valley = False
+    has_peak = False
+
+    k_lo = math.floor(x.lo / (2 * math.pi))
+    k_hi = math.ceil(x.hi / (2 * math.pi))
+
+    for k in range(k_lo, k_hi + 1):
+        if x.lo <= -math.pi / 2 + 2 * math.pi * k <= x.hi:
+            has_valley = True
+        if x.lo <= math.pi / 2 + 2 * math.pi * k <= x.hi:
+            has_peak = True
+        if has_valley and has_peak:
+            break
+
+    new_lo = -1 if has_valley else min(math.sin(x.lo), math.sin(x.hi))
+    new_hi = 1 if has_peak else max(math.sin(x.lo), math.sin(x.hi))
+
+    return Interval(new_lo, new_hi)
+
+
+def dist(a: Interval, b: Interval) -> float:
+    return max(abs(a.lo - b.lo), abs(a.hi - b.hi))
+
+
+def exact_range(f, X:Interval) -> Interval:
+    N = 10001
+    xs = np.linspace(X.lo, X.hi, N)
+    ys = f(xs)
+
+    i_min = np.argmin(ys)
+    i_max = np.argmax(ys)
+
+    new_lo = minimize_scalar(f, bounds=(xs[max(i_min - 1, 0)], xs[min(i_min + 1, N - 1)]), method="bounded").fun
+    new_hi = -minimize_scalar(lambda x: -f(x), bounds=(xs[max(i_max - 1, 0)], xs[min(i_max + 1, N - 1)]), method="bounded").fun
+
+    return Interval(min(ys.min(), new_lo), max(ys.max(), new_hi))
+
+
+def exact_range_2d(f, X: Interval, Y: Interval) -> Interval:
+    n_pts = 1001
+    xs = np.linspace(X.lo, X.hi, n_pts)
+    ys = np.linspace(Y.lo, Y.hi, n_pts)
+    X_grid, Y_grid = np.meshgrid(xs, ys)
+    Z_grid = f(X_grid, Y_grid)
+
+    bounds = [(X.lo, X.hi), (Y.lo, Y.hi)]
+
+    min_idx = np.unravel_index(np.argmin(Z_grid), Z_grid.shape)
+    x0_min = [X_grid[min_idx], Y_grid[min_idx]]
+    res_min = minimize(lambda v: f(v[0], v[1]), x0_min, bounds=bounds, method="L-BFGS-B")
+    val_min = min(float(Z_grid.min()), float(res_min.fun))
+
+    max_idx = np.unravel_index(np.argmax(Z_grid), Z_grid.shape)
+    x0_max = [X_grid[max_idx], Y_grid[max_idx]]
+    res_max = minimize(lambda v: -f(v[0], v[1]), x0_max, bounds=bounds, method="L-BFGS-B")
+    val_max = max(float(Z_grid.max()), float(-res_max.fun))
+
+    return Interval(val_min, val_max)
+
+
+def cut(x: float, bound: "Interval") -> float:
+    if x < bound.lo: return bound.lo
+    elif x > bound.hi: return bound.hi
+    
+    return x
+
+
+def intersect(a: "Interval", b: "Interval") -> "Interval":
+    new_lo = max(a.lo, b.lo)
+    new_hi = min(a.hi, b.hi)
+
+    return Interval(new_lo, new_hi)
+
+
+def l_const(df, X: Interval) -> float:
+    df_bounds = exact_range(df, X)
+    return max(abs(df_bounds.lo), abs(df_bounds.hi))
+
+
+def lip_bound(F: Interval, L, X: Interval) -> bool:
+    return F.rad() <= X.rad() * L
+
+
+def contains(F: Interval, E: Interval) -> bool:
+    eps = 1e-9
+    return F.lo <= E.lo + eps and F.hi >= E.hi - eps
+
+
+def print_row(name: str, F: Interval, E: Interval, X: Interval, L: float | None = None) -> None:
+    lip_val = f"{lip_bound(F, L, X)}" if L is not None else "-"
+    incl_val = f"{contains(F, E)}"
+    print(
+        f"{name:<32} | F: [{F.lo:8.3f}, {F.hi:8.3f}] | rad: {F.rad():7.3f} | dist: {dist(F, E):7.3f} | incl: {incl_val:<5} | lip: {lip_val}"
+    )
+
+
+def hull(a: Interval, b: Interval) -> Interval:
+    return Interval(min(a.lo, b.lo), max(a.hi, b.hi))
+
+
+def split(I: Interval, k: int) -> list[Interval]:
+    edges = np.linspace(I.lo, I.hi, k + 1)
+    return [Interval(float(edges[i]), float(edges[i + 1])) for i in range(k)]
+
+
+def F_subdiv(f, X: Interval, Y: Interval, nx: int, ny: int) -> Interval:
+    x_parts = split(X, nx)
+    y_parts = split(Y, ny)
+
+    res: Interval | None = None
+    for xi in x_parts:
+        for yj in y_parts:
+            f_part = f(xi, yj)
+            res = f_part if res is None else hull(res, f_part)
+
+    assert res is not None
+    return res
+
+
+def visualization(f, X:Interval, func_name: str) -> None:
+    N = 300
+    x_f = np.linspace(X.lo, X.hi, N)
+    y_f = f(x_f)
+
+    bounds = exact_range(f, X)
+    y_min = bounds.lo
+    y_max = bounds.hi
+
+    plt.figure(figsize=(10, 6))
+
+    plt.plot(x_f, y_f, label='$f(x)$', color='blue')
+    plt.axhline(y_min, ls='--', linewidth=2, color='red', label=f'Min:{y_min:.2f}')
+    plt.axhline(y_max, ls='--', linewidth=2, color='green', label=f'Max:{y_max:.2f}')
+
+    plt.fill_between(x_f, y_min, y_max, color='gray', alpha=0.2)
+
+    
+    plt.xlabel('$x$')
+    plt.ylabel('$f(x)$')
+    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+    plt.grid()
+    plt.tight_layout()
+
+    script_dir = Path(__file__).resolve().parent
+    save_path = script_dir.parent / "report" / "figures" / f"{func_name}.png"
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
+    # plt.show()
+    plt.close()
+
+
+def visualization_f3(X: Interval, Y: Interval) -> None:
+    n_pts = 200
+    x_vals = np.linspace(X.lo, X.hi, n_pts)
+    y_vals = np.linspace(Y.lo, Y.hi, n_pts)
+    X_grid, Y_grid = np.meshgrid(x_vals, y_vals)
+    Z_grid = f3(X_grid, Y_grid)
+
+    figures_dir = Path(__file__).resolve().parent.parent / "report" / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection="3d")
+    surf = ax.plot_surface(X_grid, Y_grid, Z_grid, cmap="viridis", edgecolor="none", alpha=0.9)
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$y$")
+    ax.set_zlabel("$f_3(x, y)$")
+    ax.set_title(r"Поверхность $f_3(x, y) = x^2 y - x y^2 + x^2$")
+    fig.colorbar(surf, ax=ax, shrink=0.5, aspect=10, pad=0.1)
+    plt.tight_layout()
+    plt.savefig(figures_dir / "f3_surface.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    contour_filled = ax.contourf(X_grid, Y_grid, Z_grid, levels=25, cmap="viridis")
+    contour_lines = ax.contour(X_grid, Y_grid, Z_grid, levels=25, colors="black", linewidths=0.6, alpha=0.7)
+    ax.clabel(contour_lines, inline=True, fontsize=8, fmt="%.1f")
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$y$")
+    ax.set_title(r"Линии уровня $f_3(x, y) = x^2 y - x y^2 + x^2$")
+    fig.colorbar(contour_filled, ax=ax, label="$f_3(x, y)$")
+    ax.grid(True, linestyle="--", alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(figures_dir / "f3_contour.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def main() -> None:
+    run_f1()
+    print()
+    
+    run_f2()
+    print()
+    
+    run_f3()
+
+
+if __name__ == "__main__":
+    main()

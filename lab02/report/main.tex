@@ -1,0 +1,567 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{multirow}
+
+\usepackage[left=3cm, right=1.5cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing 
+
+\usepackage{indentfirst}
+\setlength{\parindent}{1.25cm} 
+\setlength{\emergencystretch}{3em}
+\usepackage[expansion=false,protrusion=false,nopatch=footnote]{microtype}
+
+\usepackage{tocloft}
+\addto\captionsrussian{\renewcommand{\contentsname}{СОДЕРЖАНИЕ}}
+\renewcommand{\cfttoctitlefont}{\hfill\normalfont}
+\renewcommand{\cftaftertoctitle}{\hfill\vspace{\baselineskip}}
+\renewcommand{\cftsecdotsep}{\cftdotsep}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        Министерство науки и высшего образования Российской Федерации\\
+        Федеральное государственное автономное образовательное учреждение высшего образования\\
+        «Санкт-Петербургский политехнический университет Петра Великого»\\
+        
+        \textbf{Физико-механический институт}\\
+        \textbf{Высшая школа прикладной математики и вычислительной физики}
+    \end{center}
+
+    \vfill
+    
+    \begin{center}
+        \textbf{Отчёт по лабораторной работе \textnumero~ 2\\[0.5cm]}
+        \textbf{Интервальное оценивание областей значений функций\\}
+        по дисциплине <<Интервальный анализ>>
+    \end{center}
+
+    \vfill
+
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \textbf{Выполнил студент гр. 5030102/30202:}\\
+        Шильдт Д.С.\\[0.5cm]
+        \textbf{Преподаватель:}\\ 
+        Баженов А.Н.
+    \end{minipage}
+
+    \vfill
+
+    \begin{center}
+        Санкт-Петербург\\2026
+    \end{center}
+\end{titlepage}
+
+\setcounter{page}{2}
+
+\tableofcontents
+\newpage
+
+\section{Постановка задачи}
+
+Вариант 15. Заданы функции
+\begin{align*}
+    f_1(x) &= x^3 - 3x^2 + 2, & \mathbf{X}_1 &= [0,\,3],\\
+    f_2(x) &= x^3\cos x, & \mathbf{X}_2 &= [-2,\,2],\\
+    f_3(x, y) &= x^2 y - x y^2 + x^2, & \mathbf{X}_3 &= [-1,\,2]\times[-1,\,2].
+\end{align*}
+Интервал $\mathbf{X}_2$ выбран самостоятельно, обоснование --- в разделе~4.2.
+
+Для $f_1$ и $f_2$ на $\mathbf{X}$ требуется:
+\begin{enumerate}
+    \item[A.] Найти $\operatorname{ran}(f, \mathbf{X})$ и построить график;
+    \item[B.] Вычислить оценки области значений: 
+        \begin{enumerate}
+            \item [B.1.] естественное расширение;
+            \item [B.2.] естественное расширение равносильного выражения (схема Горнера или другое преобразование);
+            \item [B.3.] дифференциальная центрированная форма $$F_{mv}(\mathbf{X}, c) = f(c) + f'(\mathbf{X})(\mathbf{X} - c)$$ при разных центрах;
+            \item [B.4.] наклонная форма $$F_{sl}(\mathbf{X}, c) = f(c) + f_{\angle}(\mathbf{X}, c)(\mathbf{X} - c)$$ при разных центрах;
+            \item[B.5.] бицентрированная среднезначная форма;
+        \end{enumerate}
+    \item[C.] Для каждой полученной интервальной оценки $F(\mathbf{X})$ найти $$\operatorname{dist}(F(\mathbf{X}), \operatorname{ran}(f, \mathbf{X}))$$ Проанализировать точность естественного интервального расширения:
+    \begin{enumerate}
+        \item [C.1.] найти константу Липшица $L$ и обосновать выбор;
+        \item [C.2.] получить оценку $\operatorname{rad}F(\mathbf{X}) \le L\operatorname{rad}\mathbf{X}$;
+        \item [C.3.] сравнить с ней $\operatorname{rad}F(\mathbf{X})$;
+    \end{enumerate}
+    \item[D.] Сравнить результаты, объяснить точность и переоценку каждого способа, влияние центра и вида выражения.
+\end{enumerate}
+
+Для $f_3$ на $\mathbf{X}_3$:
+\begin{enumerate}
+    \item[E.1] построить график поверхности и линии уровня;
+    \item[E.2] найти $\operatorname{ran}(f_3, \mathbf{X}) = \left[ \min\limits_{(x,y)\in \mathbf{X}} f_3(x,y), \max\limits_{(x,y)\in \mathbf{X}} f_3(x,y) \right]$;
+    \item[E.3] вычислить естественное расширение;
+    \item[E.4] вычислить естественное расширение равносильного выражения и сравнить оценки;
+    \item[E.5] вычислить дифференциальную центрированную форму $$F_{\mathrm{mv}}(\mathbf{X}, c) = f_3(c) + \frac{\partial f_3}{\partial x}(\mathbf{X})(\mathbf{X}_1 - c_1) + \frac{\partial f_3}{\partial y}(\mathbf{X})(\mathbf{X}_2 - c_2),$$ где $c = (c_1, c_2) \in \mathbf{X}$, не менее чем при двух центрах, один из которых $c = \operatorname{mid}\mathbf{X}$;
+    \item[E.6] построить бицентрированную форму по теореме Бауманна и сравнить с естественным расширением и центрированной формой;
+    \item[E.7] разбить брус пополам по $x$ и по $y$, вычислить естественные расширения на подбрусах, взять интервальную оболочку $\square(\mathbf{A} \cup \mathbf{B}) = [\min(\underline{a}, \underline{b}),\, \max(\overline{a}, \overline{b})]$ и сравнить с оценкой на исходном брусе;
+    \item[E.8] найти $L_1 \ge \sup\left|\partial f_3/\partial x\right|$, $L_2 \ge \sup\left|\partial f_3/\partial y\right|$ и проверить $\operatorname{rad}F_3(\mathbf{X}_3) \le L_1\operatorname{rad}\mathbf{X}_{3,1} + L_2\operatorname{rad}\mathbf{X}_{3,2}$;
+    \item[E.9] найти расстояния от всех оценок до $\operatorname{ran}(f_3, \mathbf{X}_3)$ и сравнить; выяснить влияние зависимости переменных, вида выражения, выбора центра и дробления бруса.
+\end{enumerate}
+
+\section{Теоретическая часть}
+
+\subsection{Основные понятия}
+
+Для интервала $\mathbf{a}$ используются $\operatorname{mid}\mathbf{a}$, $\operatorname{rad}\mathbf{a}$, $\operatorname{wid}\mathbf{a} = 2\operatorname{rad}\mathbf{a}$ и магнитуда $|\mathbf{a}| = \max\{|\underline{a}|, |\overline{a}|\}$~\cite[с.~25--27]{bazhenov}. Целая степень определяется как повторное произведение (1.22), поэтому $[-1,\,2]^2 = [-2,\,4]$, а не $[0,\,4]$. Расстояние между интервалами (1.25):
+\begin{equation*}
+    \operatorname{dist}(\mathbf{a}, \mathbf{b}) = \max\{|\underline{a} - \underline{b}|,\ |\overline{a} - \overline{b}|\}.
+\end{equation*}
+Для непрерывной $f$ область значений $\operatorname{ran}(f, \mathbf{X}) = \left[ \min\limits_{x\in \mathbf{X}} f(x), \max\limits_{x\in \mathbf{X}} f(x) \right]$. Естественное расширение (определение~1.3.5) функции $f$, обозначаемое $f_\natural$, получается заменой аргументов интервалами, а операций --- их интервальными аналогами. Результат содержит $\operatorname{ran}(f, \mathbf{X})$ (теорема~1.1.1, (1.11)), причём совпадает с ним, если каждая переменная входит в выражение один раз в первой степени. В остальных случаях оценка зависит от вида выражения \cite[с.~23, 64--66]{bazhenov} и может быть шире области значений из-за повторных вхождений переменных.
+
+\subsection{Центрированные формы}
+
+Формы приведены по~\cite[с.~73--78]{bazhenov}.
+
+\textbf{Дифференциальная (среднезначная) форма} (1.62), $c \in \mathbf{X}$:
+\begin{equation*}
+    F_{mv}(\mathbf{X}, c) = f(c) + f'(\mathbf{X})\,(\mathbf{X} - c).
+\end{equation*}
+Она содержит $\operatorname{ran}(f, \mathbf{X})$ в силу теоремы Лагранжа о среднем значении. Для функции двух переменных
+\begin{equation*}
+    F_{mv}(\mathbf{X}, c) = f(c) + \frac{\partial f}{\partial x}(\mathbf{X})\,(\mathbf{X}_1 - c_1) + \frac{\partial f}{\partial y}(\mathbf{X})\,(\mathbf{X}_2 - c_2).
+\end{equation*}
+
+\textbf{Наклонная форма} (1.63), (1.64):
+\begin{gather*}
+    f(x) = f(c) + f_{\angle}(x, c)\,(x - c), \qquad f_{\angle}(x, c) = \frac{f(x) - f(c)}{x - c},\\
+    F_{sl}(\mathbf{X}, c) = f(c) + f_{\angle}(\mathbf{X}, c)\,(\mathbf{X} - c).
+\end{gather*}
+Из (1.66) $f_{\angle}(\mathbf{X}, c) \subseteq f'(\mathbf{X})$, поэтому при одном центре $F_{sl} \subseteq F_{mv}$.
+
+\textbf{Бицентрированная форма} (1.67) --- пересечение среднезначных форм в двух центрах:
+\begin{equation*}
+    F_{bic} = F_{mv}(\mathbf{X}, c_\star) \cap F_{mv}(\mathbf{X}, c^\star).
+\end{equation*}
+Центры определяются теоремой Бауманна~1.3.4:
+\begin{gather*}
+    p_i = \operatorname{cut}\!\left(\frac{\operatorname{mid}f_i'(\mathbf{X})}{\operatorname{rad}f_i'(\mathbf{X})},\ [-1, 1]\right),\\
+    (c_\star)_i = \operatorname{mid}\mathbf{X}_i - p_i\operatorname{rad}\mathbf{X}_i,\qquad
+    (c^\star)_i = \operatorname{mid}\mathbf{X}_i + p_i\operatorname{rad}\mathbf{X}_i.
+\end{gather*}
+При этом $\underline{F_{mv}}$ максимальна по $c$ в точке $c_\star$, $\overline{F_{mv}}$ минимальна в точке $c^\star$, а $\operatorname{rad}F_{mv}$ минимален при $c = \operatorname{mid}\mathbf{X}$.
+
+\subsection{Константы Липшица}
+
+Функция $f$ называется липшицевой с константой $L_f$, если $|f(x) - f(y)| \le L_f|x - y|$ (определение~1.3.6). Для интервальной функции условие записывается через расстояние: $\operatorname{dist}(F(\mathbf{x}), F(\mathbf{y})) \le L_F\cdot\operatorname{Dist}(\mathbf{x}, \mathbf{y})$ (определение~1.3.7)~\cite[с.~69]{bazhenov}. Константу $L_F$ естественного расширения находят по таблице из теоремы~1.3.1~\cite[с.~67]{bazhenov} (таблица~\ref{tab:lip}), где $g$, $h$ --- подвыражения, а $g_\natural(\mathbf{X})$, $h_\natural(\mathbf{X})$ --- их естественные расширения на $\mathbf{X}$.
+
+\begin{table}[H]
+    \centering
+    \caption{Константы Липшица естественного расширения}
+    \label{tab:lip}
+    \begin{tabular}{|l|l|}
+        \hline
+        $0$ & если $f$ есть константа \\ \hline
+        $i$-ая строка единичной матрицы & если $f = x_i$, $i = 1, 2, \dots, n$ \\ \hline
+        $L_g + L_h$ & если $f = g \pm h$ \\ \hline
+        $|g_\natural(\mathbf{X})|\,L_h + L_g\,|h_\natural(\mathbf{X})|$ & если $f = g \cdot h$ \\ \hline
+        $\dfrac{L_g + |f_\natural(\mathbf{X})|\,L_h}{\langle h_\natural(\mathbf{X})\rangle}$ & если $f = g / h$ \\ \hline
+        $\alpha\,|g_\natural(\mathbf{X})|^{\alpha-1}\,L_g$ & если $f = g^\alpha$, $1 \le \alpha \in \mathbb{R}$ \\ \hline
+        $L_\phi\bigl(g_\natural(\mathbf{X})\bigr)\cdot L_g$ & если $f = \phi(g)$, $\phi \in \mathcal{EF}$ \\ \hline
+    \end{tabular}
+\end{table}
+
+Если взять в (1.58) вырожденный $\mathbf{y} = [\operatorname{mid}\mathbf{X},\,\operatorname{mid}\mathbf{X}]$, то $\operatorname{Dist}(\mathbf{X}, \mathbf{y}) = \operatorname{rad}\mathbf{X}$, а расстояние от $F(\mathbf{X})$ до точки не меньше $\operatorname{rad}F(\mathbf{X})$. Отсюда
+\begin{equation*}
+    \operatorname{rad}F(\mathbf{X}) \le L_F\operatorname{rad}\mathbf{X}, \qquad
+    \operatorname{rad}F(\mathbf{X}) \le L_1\operatorname{rad}\mathbf{X}_1 + L_2\operatorname{rad}\mathbf{X}_2
+\end{equation*}
+для одной и двух переменных. Константа точечной функции $L_f = \max_{\mathbf{X}}|f'|$ такой гарантии не даёт. Точность естественного расширения --- первого порядка: $\operatorname{dist}(F(\mathbf{x}), \operatorname{ran}(f, \mathbf{x})) \le C\|\operatorname{wid}\mathbf{x}\|$ (1.59, теорема~1.3.2).
+
+\section{Реализация}
+
+\subsection{Язык программирования и среда}
+\begin{itemize}
+    \item \textbf{Используемый язык:} Python 3.14.2
+    \item \textbf{Используемая среда разработки:} Visual Studio Code
+\end{itemize}
+
+\subsection{Используемые библиотеки}
+\begin{itemize}
+    \item \textbf{numpy} --- сетки, \texttt{meshgrid}, поиск наименьшего и наибольшего значений на сетке.
+    \item \textbf{scipy.optimize} --- \texttt{minimize\_scalar} и \texttt{minimize} для уточнения экстремумов.
+    \item \textbf{matplotlib} --- графики, поверхность и линии уровня.
+    \item \textbf{math}, \textbf{pathlib} --- элементарные функции и пути сохранения рисунков.
+\end{itemize}
+
+\subsection{Суть реализованных методов}
+
+Класс \texttt{Interval(lo, hi)}: методы \texttt{mid()}, \texttt{rad()}, \texttt{wid()}, перегрузка $+$, $-$, $\cdot$ и целая степень как повторное произведение (1.22).
+
+Функции модуля:
+\begin{itemize}
+    \item \texttt{icos(x)}, \texttt{isin(x)} --- интервальные $\cos$ и $\sin$. Проверяется, лежит ли внутри интервала точка максимума или минимума; если да, граница равна $1$ или $-1$, иначе берутся значения на концах.
+    \item \texttt{exact\_range(f, X)} --- точная область значений: сетка из 10001 точки, затем уточнение через \texttt{minimize\_scalar}. \texttt{exact\_range\_2d} --- то же для двух переменных.
+    \item \texttt{F\_mv}, \texttt{F\_sl}, \texttt{F\_bic}, \texttt{F\_mv\_2d}, \texttt{F\_bic\_2d} --- формы из пунктов B.3--B.5 и E.5--E.6. Параметр $p$ ограничивается функцией \texttt{cut}, пересечение --- \texttt{intersect}.
+    \item \texttt{dist} --- расстояние; \texttt{l\_const} --- $L_f = \max|f'|$; \texttt{lip\_bound} --- проверка $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}$; \texttt{contains} --- проверка $F \supseteq E$ с допуском $10^{-9}$.
+    \item \texttt{split}, \texttt{hull}, \texttt{F\_subdiv} --- деление бруса на равные части, естественное расширение на каждой и оболочка результатов.
+\end{itemize}
+
+
+\section{Результаты}
+
+Во всех таблицах $E$ --- точная область значений $\operatorname{ran}(f,\mathbf{X})$. Для $f_1$ она найдена аналитически, для $f_2$ и $f_3$ --- численно, функциями \texttt{exact\_range} и \texttt{exact\_range\_2d} (раздел~3.3). Программа проверила включение $F \supseteq E$ во всех строках, оно выполнено.
+
+\subsection{Функция $f_1$}
+
+\textbf{A.} Производная $f_1'(x) = 3x(x-2)$ обращается в нуль в точках $0$ и $2$. Сравнение значений в критических точках и на концах:
+\begin{equation*}
+    f_1(0) = 2,\qquad f_1(2) = -2,\qquad f_1(3) = 2
+    \quad\Rightarrow\quad E_1 = \operatorname{ran}(f_1, \mathbf{X}_1) = [-2;\ 2]
+\end{equation*}
+(рис.~\ref{fig:f1}). Численный результат программы совпал.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/f1.png}
+    \caption{График $f_1$ на $[0,\,3]$ и границы области значений}
+    \label{fig:f1}
+\end{figure}
+
+\textbf{B, C (расстояния).} Схема Горнера: $f_1(x) = ((x-3)\,x + 0)\,x + 2$. Производная $f_1'(x) = 3x^2 - 6x$, её оценка $f_1'(\mathbf{X}_1) = [-18;\ 27]$. Наклон $f_{1\angle}(x, c) = x^2 + xc + c^2 - 3x - 3c$. Результаты приведены в таблице~\ref{tab:f1}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Оценки области значений $f_1$ на $\mathbf{X}_1 = [0,\,3]$}
+    \label{tab:f1}
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        Способ & $F$ & $\operatorname{rad}F$ & $\operatorname{dist}(F, E)$ \\ \hline
+        B.1 Естественное расширение & $[-25.000;\ 29.000]$ & 27.000 & 27.000 \\ \hline
+        B.2 Схема Горнера & $[-25.000;\ 2.000]$ & 13.500 & 23.000 \\ \hline
+        B.3 Среднезначная, $c=0$ & $[-52.000;\ 83.000]$ & 67.500 & 81.000 \\ \hline
+        B.3 Среднезначная, $c=1.5$ & $[-41.875;\ 39.125]$ & 40.500 & 39.875 \\ \hline
+        B.3 Среднезначная, $c=3$ & $[-79.000;\ 56.000]$ & 67.500 & 77.000 \\ \hline
+        B.4 Наклонная, $c=0$ & $[-25.000;\ 29.000]$ & 27.000 & 27.000 \\ \hline
+        B.4 Наклонная, $c=1.5$ & $[-18.250;\ 15.500]$ & 16.875 & 16.250 \\ \hline
+        B.4 Наклонная, $c=3$ & $[-52.000;\ 29.000]$ & 40.500 & 50.000 \\ \hline
+        B.5 Бицентрированная & $[-32.992;\ 30.512]$ & 31.752 & 30.992 \\ \hline
+    \end{tabular}
+\end{table}
+
+
+Подстановка для $c = 1.5 = \operatorname{mid}\mathbf{X}_1$:
+\begin{gather*}
+    F_{mv}(\mathbf{X}_1, 1.5) = -1.375 + [-18;\,27]\cdot[-1.5;\,1.5] = [-41.875;\ 39.125],\\
+    f_{1\angle}(\mathbf{X}_1, 1.5) = [-11.25;\,11.25] \subseteq f_1'(\mathbf{X}_1) = [-18;\,27],\\
+    F_{sl}(\mathbf{X}_1, 1.5) = -1.375 + [-11.25;\,11.25]\cdot[-1.5;\,1.5] = [-18.25;\ 15.5].
+\end{gather*}
+Параметры B.5:
+\begin{gather*}
+    \operatorname{mid}f_1'(\mathbf{X}_1) = 4.5,\qquad \operatorname{rad}f_1'(\mathbf{X}_1) = 22.5,\\
+    p = \operatorname{cut}\!\left(\frac{4.5}{22.5},\ [-1, 1]\right) = 0.2,\qquad c_\star = 1.2,\quad c^\star = 1.8.
+\end{gather*}
+
+\textbf{C.1.} Точечная константа $L_f = \max_{\mathbf{X}_1}|f_1'| = |f_1'(3)| = 9$. Константы расширений по теореме~1.3.1 при $|\mathbf{X}_1| = 3$:
+\begin{itemize}
+    \item естественное: $L_{x^3} = 3\cdot3^2 = 27$, $L_{3x^2} = 3\cdot2\cdot3 = 18$, $L_F = 27 + 18 = 45$;
+    \item Горнер: $\mathbf{g} = (\mathbf{x} - 3)\mathbf{x} = [-3;\,0]\cdot[0;\,3] = [-9;\,0]$, $L_g = 3\cdot1 + 1\cdot3 = 6$; $L_F = |\mathbf{g}|\cdot1 + L_g\cdot|\mathbf{x}| = 9 + 6\cdot3 = 27$.
+\end{itemize}
+
+Берём $L_F$, так как оценка $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}$ гарантирована только для неё (определение~1.3.7); с $L_f$ для естественного расширения она нарушается ($27 > 13.5$).
+
+\textbf{C.2, C.3.} Результаты проверки $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}_1$, $\operatorname{rad}\mathbf{X}_1 = 1.5$, --- в таблице~\ref{tab:f1lip}.
+
+\begin{table}[H]
+    \centering
+    \caption{Проверка $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}_1$ для $f_1$}
+    \label{tab:f1lip}
+    \small
+    \begin{tabular}{|l|c|c|c|c|c|}
+        \hline
+        Выражение & $\operatorname{rad}F$ & $L_f$ & $L_f\operatorname{rad}\mathbf{X}_1$ & $L_F$ & $L_F\operatorname{rad}\mathbf{X}_1$ \\ \hline
+        Естественное & 27 & 9 & 13.5 (нет) & 45 & 67.5 (да) \\ \hline
+        Горнер & 13.5 & 9 & 13.5 (да) & 27 & 40.5 (да) \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Функция $f_2$}
+
+\textbf{Выбор интервала.} Стационарные точки находятся из уравнения
+\begin{equation*}
+    f_2'(x) = x^2\,(3\cos x - x\sin x) = 0,
+\end{equation*}
+то есть $x = 0$ или $x\tan x = 3$. Второе уравнение на $[-2;\,2]$ даёт $x \approx \pm1.192$: там у функции локальный максимум $f_2(1.192) = 0.626$ и минимум $f_2(-1.192) = -0.626$. Нули функции --- $0$ и $\pm\pi/2$. Интервал $[-2;\,2]$ содержит все эти точки.
+
+\textbf{A.} $E_2 = [-3.329;\ 3.329]$; границы достигаются на концах $\mathbf{X}_2$ ($f_2(-2) = 3.329$, $f_2(2) = -3.329$), локальные экстремумы лежат внутри (рис.~\ref{fig:f2}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/f2.png}
+    \caption{График $f_2$ на $[-2,\,2]$ и границы области значений}
+    \label{fig:f2}
+\end{figure}
+
+\textbf{B, C (расстояния).} Наклон: $f_{2\angle}(\mathbf{X}, c) = (\mathbf{X}^2 + c\mathbf{X} + c^2)\cos\mathbf{X} - c^3\sin\mathbf{X}$. Результаты --- в таблице~\ref{tab:f2}. Производная $f_2'(\mathbf{X}_2) = [-20;\ 20]$.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Оценки области значений $f_2$ на $\mathbf{X}_2 = [-2,\,2]$}
+    \label{tab:f2}
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        Способ & $F$ & $\operatorname{rad}F$ & $\operatorname{dist}(F, E)$ \\ \hline
+        B.1 Естественное расширение & $[-8.000;\ 8.000]$ & 8.000 & 4.671 \\ \hline
+        B.2 $(x\cdot x)(x\cos x)$ & $[-8.000;\ 8.000]$ & 8.000 & 4.671 \\ \hline
+        B.3 Среднезначная, $c=-2$ & $[-76.671;\ 83.329]$ & 80.000 & 80.000 \\ \hline
+        B.3 Среднезначная, $c=-1$ & $[-60.540;\ 59.460]$ & 60.000 & 57.211 \\ \hline
+        B.3 Среднезначная, $c=0$ & $[-40.000;\ 40.000]$ & 40.000 & 36.671 \\ \hline
+        B.3 Среднезначная, $c=1$ & $[-59.460;\ 60.540]$ & 60.000 & 57.211 \\ \hline
+        B.3 Среднезначная, $c=2$ & $[-83.329;\ 76.671]$ & 80.000 & 80.000 \\ \hline
+        B.4 Наклонная, $c=-2$ & $[-48.646;\ 83.329]$ & 65.988 & 80.000 \\ \hline
+        B.4 Наклонная, $c=-1$ & $[-18.540;\ 23.460]$ & 21.000 & 20.131 \\ \hline
+        B.4 Наклонная, $c=0$ & $[-8.000;\ 8.000]$ & 8.000 & 4.671 \\ \hline
+        B.4 Наклонная, $c=1$ & $[-23.460;\ 18.540]$ & 21.000 & 20.131 \\ \hline
+        B.4 Наклонная, $c=2$ & $[-83.329;\ 48.646]$ & 65.988 & 80.000 \\ \hline
+        B.5 Бицентрированная & $[-40.000;\ 40.000]$ & 40.000 & 36.671 \\ \hline
+    \end{tabular}
+\end{table}
+
+
+Для B.5 $\operatorname{mid}f_2'(\mathbf{X}_2) = 0$, поэтому
+\begin{equation*}
+    p = 0,\qquad c_\star = c^\star = 0.
+\end{equation*}
+
+\textbf{C.1.} Точечная константа $L_f = \max_{\mathbf{X}_2}|f_2'| = 12.268$. Константа естественного расширения $x^3\cos x$ по теореме~1.3.1 при $|\mathbf{X}_2| = 2$:
+\begin{itemize}
+    \item $g = x^3$: $L_g = 3\cdot2^2 = 12$, $|\mathbf{g}| = 8$;
+    \item $h = \cos x$: $L_h = 1$, $|\mathbf{h}| = 1$;
+    \item $L_F = |\mathbf{g}|\,L_h + L_g\,|\mathbf{h}| = 8\cdot1 + 12\cdot1 = 20$.
+\end{itemize}
+
+Берём $L_F$ по той же причине, что и для $f_1$: именно для неё гарантирована оценка C.2.
+
+\textbf{C.2, C.3.} Результаты проверки $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}_2$, $\operatorname{rad}\mathbf{X}_2 = 2$, --- в таблице~\ref{tab:f2lip}.
+
+\begin{table}[H]
+    \centering
+    \caption{Проверка $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}_2$ для $f_2$}
+    \label{tab:f2lip}
+    \small
+    \begin{tabular}{|l|c|c|c|c|c|}
+        \hline
+        Выражение & $\operatorname{rad}F$ & $L_f$ & $L_f\operatorname{rad}\mathbf{X}_2$ & $L_F$ & $L_F\operatorname{rad}\mathbf{X}_2$ \\ \hline
+        Естественное & 8 & 12.268 & 24.536 (да) & 20 & 40 (да) \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Функция $f_3$}
+
+\textbf{E.1.} Поверхность и линии уровня --- на рис.~\ref{fig:f3}.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/f3_surface.png}
+        \caption{Поверхность}
+        \label{fig:f3s}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/f3_contour.png}
+        \caption{Линии уровня}
+        \label{fig:f3c}
+    \end{subfigure}
+    \caption{Функция $f_3(x, y)$ на $\mathbf{X}_3$}
+    \label{fig:f3}
+\end{figure}
+
+\textbf{E.2.} $E_3 = \operatorname{ran}(f_3, \mathbf{X}_3) = [-2;\ 7]$; значения достигаются в углах бруса: $f_3(2,-1) = -2$, $f_3(-1,2) = 7$.
+
+\textbf{E.3.} Промежуточные интервалы естественного расширения:
+\begin{equation*}
+    \mathbf{x}^2 = [-2;\,4],\qquad \mathbf{x}^2\mathbf{y} = [-4;\,8],\qquad \mathbf{y}^2 = [-2;\,4],\qquad \mathbf{x}\mathbf{y}^2 = [-4;\,8],
+\end{equation*}
+\begin{equation*}
+    F = \mathbf{x}^2\mathbf{y} - \mathbf{x}\mathbf{y}^2 + \mathbf{x}^2 = [-4;\,8] - [-4;\,8] + [-2;\,4] = [-14;\,16].
+\end{equation*}
+
+\textbf{E.4.} Для выражения $x\,(x(y+1) - y^2)$:
+\begin{equation*}
+    \mathbf{x}(\mathbf{y}+1) = [-3;\,6],\qquad \mathbf{y}^2 = [-2;\,4],\qquad \mathbf{x}(\mathbf{y}+1) - \mathbf{y}^2 = [-7;\,8].
+\end{equation*}
+
+    
+\textbf{E.5.} Частные производные:
+\begin{equation*}
+    \frac{\partial f_3}{\partial x} = 2xy - y^2 + 2x,\qquad \frac{\partial f_3}{\partial y} = x^2 - 2xy.
+\end{equation*}
+Их оценки на брусе:
+\begin{equation*}
+    \frac{\partial f_3}{\partial x}(\mathbf{X}_3) = [-10;\,14],\qquad \frac{\partial f_3}{\partial y}(\mathbf{X}_3) = [-10;\,8].
+\end{equation*}
+
+\textbf{E.6.} Параметры теоремы Бауманна:
+\begin{gather*}
+    p_1 = \frac16,\qquad p_2 = -\frac19,\\
+    c_\star = (0.25;\ 0.667),\qquad c^\star = (0.75;\ 0.333).
+\end{gather*}
+
+Результаты E.3--E.6 --- в таблице~\ref{tab:f3}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Оценки области значений $f_3$ на $\mathbf{X}_3 = [-1,\,2]\times[-1,\,2]$}
+    \label{tab:f3}
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        Способ & $F$ & $\operatorname{rad}F$ & $\operatorname{dist}(F, E)$ \\ \hline
+        E.3 Естественное расширение & $[-14.000;\ 16.000]$ & 15.000 & 12.000 \\ \hline
+        E.4 $x\,(x(y+1)-y^2)$ & $[-14.000;\ 16.000]$ & 15.000 & 12.000 \\ \hline
+        E.5 Среднезначная, $c=(0.5,\,0.5)$ & $[-35.750;\ 36.250]$ & 36.000 & 33.750 \\ \hline
+        E.5 Среднезначная, $c=(0,\,0)$ & $[-40.000;\ 44.000]$ & 42.000 & 38.000 \\ \hline
+        E.5 Среднезначная, $c=(-1,\,-1)$ & $[-59.000;\ 67.000]$ & 63.000 & 60.000 \\ \hline
+        E.5 Среднезначная, $c=(2,\,2)$ & $[-62.000;\ 64.000]$ & 63.000 & 60.000 \\ \hline
+        E.5 Среднезначная, $c=(-1,\,2)$ & $[-47.000;\ 79.000]$ & 63.000 & 72.000 \\ \hline
+        E.6 Бицентрированная & $[-30.840;\ 31.500]$ & 31.170 & 28.840 \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\textbf{E.7.} Естественные расширения на подбрусах и их оболочки --- в таблице~\ref{tab:f3half}. Для вложенного дробления на $n\times n$ равных частей --- в таблице~\ref{tab:f3sub}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Естественное расширение $f_3$ на половинах бруса и оболочки}
+    \label{tab:f3half}
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        Брус & $F$ & $\operatorname{rad}F$ & $\operatorname{dist}(F, E)$ \\ \hline
+        $x$: $[-1,\,0.5]\times[-1,\,2]$ & $[-3.500;\ 7.000]$ & 5.250 & --- \\ \hline
+        $x$: $[0.5,\,2]\times[-1,\,2]$ & $[-11.750;\ 16.000]$ & 13.875 & --- \\ \hline
+        $x$: оболочка $2\times1$ & $[-11.750;\ 16.000]$ & 13.875 & 9.750 \\ \hline
+        $y$: $[-1,\,2]\times[-1,\,0.5]$ & $[-8.000;\ 7.000]$ & 7.500 & --- \\ \hline
+        $y$: $[-1,\,2]\times[0.5,\,2]$ & $[-14.000;\ 16.000]$ & 15.000 & --- \\ \hline
+        $y$: оболочка $1\times2$ & $[-14.000;\ 16.000]$ & 15.000 & 12.000 \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Оболочки при вложенном дроблении бруса $f_3$ на $n\times n$ частей}
+    \label{tab:f3sub}
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        Разбиение & $F$ & $\operatorname{rad}F$ & $\operatorname{dist}(F, E)$ \\ \hline
+        $2\times2$ & $[-7.625;\ 11.875]$ & 9.750 & 5.625 \\ \hline
+        $4\times4$ & $[-4.484;\ 10.047]$ & 7.266 & 3.047 \\ \hline
+        $8\times8$ & $[-3.359;\ 7.961]$ & 5.660 & 1.359 \\ \hline
+        $16\times16$ & $[-2.715;\ 7.000]$ & 4.857 & 0.715 \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\textbf{E.8.} Частные производные: $L_{1,f} = \max|\partial f_3/\partial x| = 10$, $L_{2,f} = \max|\partial f_3/\partial y| = 8$. Константы расширений по теореме~1.3.1 при $|\mathbf{X}_{3,1}| = |\mathbf{X}_{3,2}| = 2$ (покомпонентно $(L_1, L_2)$):
+\begin{center}
+    \begin{tabular}{|l|c|c|}
+        \hline
+        Слагаемое & $L_1$ & $L_2$ \\ \hline
+        $x^2y$ & 8 & 4 \\ \hline
+        $xy^2$ & 4 & 8 \\ \hline
+        $x^2$ & 4 & 0 \\ \hline
+        $f_3 = x^2y - xy^2 + x^2$ & 16 & 12 \\ \hline
+    \end{tabular}
+\end{center}
+При $\operatorname{rad}\mathbf{X}_{3,1} = \operatorname{rad}\mathbf{X}_{3,2} = 1.5$:
+\begin{gather*}
+    L_{1,F}\operatorname{rad}\mathbf{X}_{3,1} + L_{2,F}\operatorname{rad}\mathbf{X}_{3,2} = 16\cdot1.5 + 12\cdot1.5 = 42,\\
+    L_{1,f}\operatorname{rad}\mathbf{X}_{3,1} + L_{2,f}\operatorname{rad}\mathbf{X}_{3,2} = 10\cdot1.5 + 8\cdot1.5 = 27.
+\end{gather*}
+Для E.3 $\operatorname{rad}F_3 = 15 \le 42$, а также $15 \le 27$.
+Для проверки берём $L_{1,F}$, $L_{2,F}$: именно для них гарантирована оценка.
+
+\textbf{E.9.} Расстояния до $E_3$ для всех оценок --- в таблице~\ref{tab:f3sum}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Расстояния до $E_3 = [-2;\ 7]$ для всех оценок $f_3$ (по возрастанию $\operatorname{dist}$)}
+    \label{tab:f3sum}
+    \begin{tabular}{|c|l|c|c|}
+        \hline
+        № & Способ & $\operatorname{dist}(F, E_3)$ & $\operatorname{rad}F$ \\ \hline
+        1 & E.7 разбиение $16\times16$ & 0.715 & 4.857 \\ \hline
+        2 & E.7 разбиение $8\times8$ & 1.359 & 5.660 \\ \hline
+        3 & E.7 разбиение $4\times4$ & 3.047 & 7.266 \\ \hline
+        4 & E.7 разбиение $2\times2$ & 5.625 & 9.750 \\ \hline
+        5 & E.7 разбиение $2\times1$ & 9.750 & 13.875 \\ \hline
+        6 & E.3 естественное & 12.000 & 15.000 \\ \hline
+        7 & E.4 равносильная & 12.000 & 15.000 \\ \hline
+        8 & E.7 разбиение $1\times2$ & 12.000 & 15.000 \\ \hline
+        9 & E.6 бицентрированная & 28.840 & 31.170 \\ \hline
+        10 & E.5 среднезначная, $c=(0.5,\ 0.5)$ & 33.750 & 36.000 \\ \hline
+        11 & E.5 среднезначная, $c=(0,\ 0)$ & 38.000 & 42.000 \\ \hline
+        12 & E.5 среднезначная, $c=(-1,\ -1)$ & 60.000 & 63.000 \\ \hline
+        13 & E.5 среднезначная, $c=(2,\ 2)$ & 60.000 & 63.000 \\ \hline
+        14 & E.5 среднезначная, $c=(-1,\ 2)$ & 72.000 & 63.000 \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\section{Обсуждение}
+
+\textbf{Естественное расширение.} Для всех трёх функций оно сильно завышает область значений: расстояния до точной области равны $27$, $4.671$ и $12$. Причина в том, что переменные входят в выражение по несколько раз, а интервальная арифметика считает эти вхождения независимыми (теорема~1.1.1).
+
+\textbf{Равносильные выражения.} У $f_1$ схема Горнера улучшила оценку: вместо $[-25;\,29]$ получилось $[-25;\,2]$, верхняя граница стала точной, расстояние уменьшилось с $27$ до $23$. У $f_2$ и $f_3$ перегруппировка ничего не изменила ($[-8;\,8]$ и $[-14;\,16]$), так как переменные всё равно входят несколько раз.
+
+\textbf{Среднезначная форма.} Результат зависит от центра, лучше всего получается в середине интервала (бруса): $c = 1.5$ для $f_1$, $c = 0$ для $f_2$, $c = (0.5,\,0.5)$ для $f_3$. Это согласуется с теоремой Бауманна. Чем дальше центр от середины, тем хуже, например у $f_2$ радиус равен $40$, $60$, $80$ при $c = 0, \pm1, \pm2$. На наших интервалах среднезначная форма хуже естественного расширения ($40.5$ против $27$ у $f_1$, $40$ против $8$ у $f_2$, $36$ против $15$ у $f_3$), потому что оценка производной слишком грубая: $[-18;\,27]$ при $L_f = 9$ у $f_1$ и $[-20;\,20]$ при $L_f = 12.268$ у $f_2$.
+
+\textbf{Наклонная форма.} При каждом центре она точнее среднезначной, что соответствует (1.66): у $f_1$ радиусы $27 < 67.5$, $16.875 < 40.5$, $40.5 < 67.5$, у $f_2$ --- $8 < 40$, $21 < 60$, $65.988 < 80$. У $f_1$ при $c = 1.5$ получилась лучшая оценка из всех способов (расстояние $16.25$). У $f_2$ при $c = 0$ результат совпал с естественным расширением.
+
+\textbf{Бицентрированная форма.} Она не хуже среднезначной при любом центре: $31.752$ против $40.5$ у $f_1$ и $31.17$ против $36$ у $f_3$. У $f_2$ она совпала со среднезначной при $c = 0$, так как середина оценки производной равна нулю и $p = 0$. Естественное расширение она не превзошла ни для одной функции.
+
+\textbf{Константы Липшица.} С $L_F$ оценка $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}$ выполняется для всех функций: $27 \le 67.5$ у $f_1$, $8 \le 40$ у $f_2$, $15 \le 42$ у $f_3$. Граница завышена в $2.5$, $5$ и $2.8$ раза. С точечной $L_f$ оценка у $f_1$ для естественного расширения не выполняется ($27 > 13.5$).
+
+\textbf{Дробление бруса $f_3$.} Деление по $x$ улучшило оценку (расстояние $12 \to 9.75$), по $y$ --- нет: оболочка совпала с оценкой на всём брусе. При дроблении на $n \times n$ частей расстояние уменьшается ($5.625$, $3.047$, $1.359$, $0.715$), примерно вдвое при удвоении $n$. При $16\times16$ верхняя граница стала точной.
+
+\section{Выводы}
+
+В работе построены интервальные оценки области значений для $f_1$, $f_2$, $f_3$ и найдены расстояния до точной области. Для всех способов включение $F \supseteq \operatorname{ran}(f, \mathbf{X})$ выполнено.
+
+\begin{enumerate}
+    \item Главная причина завышения в естественном расширении --- повторные вхождения переменных. Расстояния до точной области равны $27$, $4.671$ и $12$.
+    \item Вид выражения влияет не всегда: у $f_1$ схема Горнера улучшила оценку ($27 \to 23$), у $f_2$ и $f_3$ оценка не изменилась.
+    \item Лучший центр --- середина интервала (бруса). Наклонная форма точнее среднезначной, бицентрированная не хуже среднезначной. На наших интервалах центрированные формы хуже естественного расширения; исключения --- наклонная форма $f_1$ при $c = 1.5$ ($16.25$ против $27$) и $f_2$ при $c = 0$ (совпала).
+    \item Оценка $\operatorname{rad}F \le L\operatorname{rad}\mathbf{X}$ выполняется для $L_F$, граница завышена в $2.5$, $5$ и $2.8$ раза. С точечной $L_f$ она нарушилась для $f_1$.
+    \item Дробление бруса даёт самый заметный выигрыш: для $f_3$ расстояние уменьшилось с $12$ до $0.715$ при $16\times16$. Деление по $x$ помогает, по $y$ --- нет.
+\end{enumerate}
+
+\refstepcounter{section}
+\addcontentsline{toc}{section}{\thesection\ Список литературы}
+\renewcommand{\refname}{\thesection\ Список литературы}
+
+\begin{thebibliography}{9}
+
+    \bibitem{bazhenov}
+    Баженов А. Н. Интервальный анализ в примерах : учеб. пособие / А. Н. Баженов, А. А. Карпова. --- СПб. : Санкт-Петербургский политехнический университет Петра Великого, 2024. --- 226 с.
+
+\end{thebibliography}
+
+\section{Приложение}
+
+GitHub репозиторий (файл \texttt{lab02/src/main.py}): \\
+\url{https://github.com/Graukern/interval-analysis-labs}
+ 
+\end{document}
