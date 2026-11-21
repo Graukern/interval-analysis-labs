@@ -101,6 +101,12 @@ class IntervalSystem:
         return len(self.A[0])
 
 
+    def __repr__(self) -> str:
+        return "\n".join(
+            f"{row!r} | {bi!r}" for row, bi in zip(self.A, self.b)
+        )
+
+
 def main() -> None:
     print(Interval(-1.30, -0.70).mag())
     print(Interval(2, 5).inner_sub(Interval(-0.5, 0.5)))
@@ -118,6 +124,8 @@ def main() -> None:
     system = IntervalSystem(A, b)
     print(system.m, system.n)
     print()
+
+    print(system)
 
 if __name__ == "__main__":
     main()
