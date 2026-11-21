@@ -83,12 +83,41 @@ class Interval:
         return Interval(new_lo, new_hi)
 
 
+class IntervalSystem:
+    def __init__(self, A: list[list[Interval]], b: list[Interval]):
+        if len(A) != len(b):
+            raise ValueError("Размеры матрицы A и вектора b не совпадают")
+        self.A = A
+        self.b = b
+
+
+    @property
+    def m(self) -> int:
+        return len(self.A)
+
+
+    @property
+    def n(self) -> int:
+        return len(self.A[0])
+
+
 def main() -> None:
     print(Interval(-1.30, -0.70).mag())
     print(Interval(2, 5).inner_sub(Interval(-0.5, 0.5)))
     print(Interval(1, 2).inner_sub(Interval(-0.5, 0.5)))
     print(Interval(0.65, 1.25) * (-1.597))
+    print()
 
+    A = [
+    [Interval( 1,  2), Interval( 3,  4)],
+    [Interval( 5,  6), Interval( 7,  8)],
+    [Interval( 9, 10), Interval(11, 12)],
+    ]
+    b = [Interval(1, 1), Interval(2, 2), Interval(3, 3)]
+
+    system = IntervalSystem(A, b)
+    print(system.m, system.n)
+    print()
 
 if __name__ == "__main__":
     main()
