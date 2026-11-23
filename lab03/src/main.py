@@ -108,24 +108,32 @@ class IntervalSystem:
 
 
 def main() -> None:
-    print(Interval(-1.30, -0.70).mag())
-    print(Interval(2, 5).inner_sub(Interval(-0.5, 0.5)))
-    print(Interval(1, 2).inner_sub(Interval(-0.5, 0.5)))
-    print(Interval(0.65, 1.25) * (-1.597))
-    print()
-
     A = [
-    [Interval( 1,  2), Interval( 3,  4)],
-    [Interval( 5,  6), Interval( 7,  8)],
-    [Interval( 9, 10), Interval(11, 12)],
+        [Interval( 0.65,  1.25), Interval(-1.30, -0.70)],
+        [Interval( 0.75,  1.35), Interval(-1.24, -0.68)],
+        [Interval( 0.80,  1.40), Interval(-1.36, -0.76)],
+        [Interval(-0.30,  0.30), Interval(-1.18, -0.62)],
     ]
-    b = [Interval(1, 1), Interval(2, 2), Interval(3, 3)]
 
-    system = IntervalSystem(A, b)
-    print(system.m, system.n)
-    print()
+    b = [
+        Interval(2.80, 2.90),
+        Interval(2.90, 3.00),
+        Interval(2.95, 3.05),
+        Interval(1.85, 1.95),
+    ]
 
-    print(system)
+    system_1 = IntervalSystem(A[:2], b[:2])
+    system_2 = IntervalSystem(A[:3], b[:3])
+    system_3 = IntervalSystem(A[:4], b[:4])
+
+    print("--- A1, b1 (2 строки) ---")
+    print(system_1)
+
+    print("\n--- A2, b2 (3 строки) ---")
+    print(system_2)
+
+    print("\n--- A3, b3 (4 строки) ---")
+    print(system_3)
 
 if __name__ == "__main__":
     main()
