@@ -107,6 +107,21 @@ class IntervalSystem:
         )
 
 
+    def tol(self, x: list[float]) -> float:
+        if len(x) != self.n:
+            raise ValueError("Число координат x должно совпадать с числом столбцов A")
+
+        margins = []
+        for row, bi in zip(self.A, self.b):
+            y = Interval(0, 0)
+            for aij, xj in zip(row, x):
+                y = y + aij * xj
+
+            margins.append(bi.rad() - (bi.mid() - y).mag())
+
+        return min(margins)
+
+
 def main() -> None:
     A = [
         [Interval( 0.65,  1.25), Interval(-1.30, -0.70)],
@@ -135,5 +150,7 @@ def main() -> None:
     print("\n--- A3, b3 (4 строки) ---")
     print(system_3)
 
+
+    print(system_1.tol([0.0, 0.0]))
 if __name__ == "__main__":
     main()
